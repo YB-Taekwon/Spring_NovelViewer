@@ -1,7 +1,7 @@
 package com.ian.novelviewer.auth.dto;
 
 import com.ian.novelviewer.common.enums.Role;
-import com.ian.novelviewer.user.domain.User;
+import com.ian.novelviewer.user.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -48,6 +48,23 @@ public class AuthDto {
                     .roles(List.of(Role.ROLE_USER))
                     .build();
         }
+    }
+
+    /**
+     * 로그인 요청 DTO
+     */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SignIn {
+
+        @NotBlank(message = "아이디를 입력해주세요.")
+        private String loginId;
+
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        private String password;
     }
 
     /**
