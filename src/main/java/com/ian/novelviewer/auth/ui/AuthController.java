@@ -23,11 +23,27 @@ public class AuthController {
      * 회원가입 API
      *
      * @param request 회원가입 요청 DTO
-     * @return 회원가입 응답 DTO (토큰 포함)
+     * @return 회원정보 + JWT 토큰
      */
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody @Valid AuthDto.SignUp request) {
+        log.info("회원가입 요청 수신: {}", request.getLoginId());
         AuthDto.AuthResponse response = authService.signup(request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 로그인 API
+     *
+     * @param request 로그인 요청 DTO
+     * @return 회원정보 + JWT 토큰
+     */
+    @PostMapping("/signin")
+    public ResponseEntity<?> signin(@RequestBody @Valid AuthDto.SignIn request) {
+        log.info("로그인 요청 수신: {}", request.getLoginId());
+        AuthDto.AuthResponse response = authService.signin(request);
+
         return ResponseEntity.ok(response);
     }
 }
