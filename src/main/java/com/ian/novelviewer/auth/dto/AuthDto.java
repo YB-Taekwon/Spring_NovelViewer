@@ -1,7 +1,7 @@
 package com.ian.novelviewer.auth.dto;
 
 import com.ian.novelviewer.common.enums.Role;
-import com.ian.novelviewer.user.User;
+import com.ian.novelviewer.user.domain.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
