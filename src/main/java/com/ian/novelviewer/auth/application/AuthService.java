@@ -4,6 +4,7 @@ import com.ian.novelviewer.auth.dto.AuthDto;
 import com.ian.novelviewer.common.security.JwtProvider;
 import com.ian.novelviewer.user.domain.User;
 import com.ian.novelviewer.user.domain.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

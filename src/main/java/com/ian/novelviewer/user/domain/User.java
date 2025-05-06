@@ -1,4 +1,4 @@
-package com.ian.novelviewer.user;
+package com.ian.novelviewer.user.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ian.novelviewer.common.base.BaseEntity;
