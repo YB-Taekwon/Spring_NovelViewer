@@ -4,6 +4,7 @@ import com.ian.novelviewer.auth.dto.AuthDto;
 import com.ian.novelviewer.common.security.JwtProvider;
 import com.ian.novelviewer.user.domain.User;
 import com.ian.novelviewer.user.domain.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,7 @@ public class AuthService {
      * @param request 회원가입 요청 DTO
      * @return 회원 정보 + JWT 토큰
      */
+    @Transactional
     public AuthDto.AuthResponse signup(AuthDto.SignUp request) {
         log.info("회원가입 요청: {}", request.getLoginId());
 
