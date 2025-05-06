@@ -1,6 +1,6 @@
 package com.ian.novelviewer.common.security;
 
-import com.ian.novelviewer.user.User;
+import com.ian.novelviewer.user.domain.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
