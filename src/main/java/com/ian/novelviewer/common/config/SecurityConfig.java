@@ -47,8 +47,15 @@ public class SecurityConfig {
                 // 세션을 사용하지 않고 JWT 기반 Stateless 인증 방식 사용
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 인가 정책 설정: /auth/** 경로는 인증 없이 허용, 나머지는 인증 필요
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll()
+                /*
+                인가 정책 설정
+                1. /auth/** 경로는 인증 없이 허용
+                2. /admin/** 경로는 ADMIN 권한만 허용
+                3. 나머지는 인증 필요
+                 */
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
