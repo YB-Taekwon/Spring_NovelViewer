@@ -1,6 +1,6 @@
 package com.ian.novelviewer.common.security;
 
-import com.ian.novelviewer.user.UserRepository;
+import com.ian.novelviewer.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
