@@ -39,7 +39,7 @@ public class JwtProvider {
         Date expiry = new Date(now.getTime() + tokenValidityInMs);
 
         List<String> authorities = roles.stream()
-                .map(role -> "ROLE_" + role.name())
+                .map(role -> role.name())
                 .toList();
 
         return Jwts.builder()
