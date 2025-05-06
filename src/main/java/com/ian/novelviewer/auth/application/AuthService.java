@@ -25,6 +25,7 @@ public class AuthService {
      * @param request 회원가입 요청 DTO
      * @return AuthResponse (회원 정보 + 토큰)
      */
+    @Transactional
     public AuthDto.AuthResponse signup(AuthDto.SignUp request) {
         log.info("회원가입 요청: {}", request.getLoginId());
 
