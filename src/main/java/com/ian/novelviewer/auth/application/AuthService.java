@@ -1,6 +1,8 @@
 package com.ian.novelviewer.auth.application;
 
 import com.ian.novelviewer.auth.dto.AuthDto;
+import com.ian.novelviewer.common.exception.CustomException;
+import com.ian.novelviewer.common.exception.ErrorCode;
 import com.ian.novelviewer.common.security.JwtProvider;
 import com.ian.novelviewer.user.User;
 import com.ian.novelviewer.user.UserRepository;
@@ -8,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import static com.ian.novelviewer.common.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -29,12 +33,12 @@ public class AuthService {
 
         if (userRepository.existsByLoginId(request.getLoginId())) {
             log.warn("중복된 로그인 아이디: {}", request.getLoginId());
-            throw new RuntimeException("이미 사용 중인 아이디입니다.");
+            throw new CustomException(DUPLICATE_LOGIN_ID);
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
             log.warn("중복된 이메일: {}", request.getEmail());
-            throw new RuntimeException("이미 가입된 이메일입니다.");
+            throw new CustomException(DUPLICATE_EMAIL);
         }
 
         request.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -63,12 +67,12 @@ public class AuthService {
         User user = userRepository.findByLoginId(request.getLoginId())
                 .orElseThrow(() -> {
                     log.warn("로그인 실패 - 존재하지 않는 아이디: {}", request.getLoginId());
-                    return new RuntimeException("아이디 또는 비밀번호가 잘못되었습니다.");
+                    return new CustomException(INVALID_CREDENTIALS);
                 });
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("로그인 실패 - 비밀번호 불일치");
-            throw new RuntimeException("아이디 또는 비밀번호가 잘못되었습니다.");
+            throw new CustomException(INVALID_CREDENTIALS);
         }
 
         String token = jwtProvider.generateToken(user.getLoginId(), user.getRoles());
