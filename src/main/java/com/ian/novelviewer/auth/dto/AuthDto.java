@@ -10,15 +10,11 @@ import java.util.List;
 
 public class AuthDto {
 
-    /**
-     * 회원가입 요청 DTO
-     */
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class SignUp {
+    public static class SignUpRequest {
 
         @NotBlank(message = "아이디를 입력해주세요.")
         private String loginId;
@@ -33,32 +29,22 @@ public class AuthDto {
         @NotBlank(message = "이름을 입력해주세요.")
         private String realname;
 
-        /**
-         * 회원가입 DTO를 User Entity로 변환합니다.
-         *
-         * @param signUp 회원가입 DTO
-         * @return User Entity
-         */
-        public static User from(AuthDto.SignUp signUp) {
+        public static User from(SignUpRequest request) {
             return User.builder()
-                    .loginId(signUp.loginId)
-                    .password(signUp.password)
-                    .email(signUp.email)
-                    .realname(signUp.realname)
+                    .loginId(request.loginId)
+                    .password(request.password)
+                    .email(request.email)
+                    .realname(request.realname)
                     .roles(List.of(Role.ROLE_USER))
                     .build();
         }
     }
 
-    /**
-     * 로그인 요청 DTO
-     */
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class SignIn {
+    public static class SignInRequest {
 
         @NotBlank(message = "아이디를 입력해주세요.")
         private String loginId;
@@ -67,30 +53,41 @@ public class AuthDto {
         private String password;
     }
 
-    /**
-     * 회원가입/로그인 응답 DTO
-     */
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class AuthResponse {
+    public static class SignUpResponse {
+
+        private String loginId;
+        private String email;
+        private String realname;
+        private List<Role> roles;
+
+        public static AuthDto.SignUpResponse from(User user) {
+            return SignUpResponse.builder()
+                    .loginId(user.getLoginId())
+                    .email(user.getEmail())
+                    .realname(user.getRealname())
+                    .roles(user.getRoles())
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SignInResponse {
+
         private String loginId;
         private String email;
         private String realname;
         private List<Role> roles;
         private String token;
 
-        /**
-         * User Entity 와 토큰을 기반으로 응답 DTO 를 생성합니다.
-         *
-         * @param user  User Entity
-         * @param token 토큰
-         * @return 응답 DTO
-         */
-        public static AuthDto.AuthResponse from(User user, String token) {
-            return AuthResponse.builder()
+        public static AuthDto.SignInResponse from(User user, String token) {
+            return SignInResponse.builder()
                     .loginId(user.getLoginId())
                     .email(user.getEmail())
                     .realname(user.getRealname())

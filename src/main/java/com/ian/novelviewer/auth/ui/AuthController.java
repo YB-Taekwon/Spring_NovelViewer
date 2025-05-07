@@ -19,30 +19,18 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * 회원가입 API
-     *
-     * @param request 회원가입 요청 DTO
-     * @return 회원정보 + JWT 토큰
-     */
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody @Valid AuthDto.SignUp request) {
+    public ResponseEntity<?> signup(@RequestBody @Valid AuthDto.SignUpRequest request) {
         log.info("회원가입 요청 수신: {}", request.getLoginId());
-        AuthDto.AuthResponse response = authService.signup(request);
+        AuthDto.SignUpResponse response = authService.signup(request);
 
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 로그인 API
-     *
-     * @param request 로그인 요청 DTO
-     * @return 회원정보 + JWT 토큰
-     */
     @PostMapping("/signin")
-    public ResponseEntity<?> signin(@RequestBody @Valid AuthDto.SignIn request) {
+    public ResponseEntity<?> signin(@RequestBody @Valid AuthDto.SignInRequest request) {
         log.info("로그인 요청 수신: {}", request.getLoginId());
-        AuthDto.AuthResponse response = authService.signin(request);
+        AuthDto.SignInResponse response = authService.signin(request);
 
         return ResponseEntity.ok(response);
     }

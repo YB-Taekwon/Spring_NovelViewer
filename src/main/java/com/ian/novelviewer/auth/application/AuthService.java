@@ -2,10 +2,10 @@ package com.ian.novelviewer.auth.application;
 
 import com.ian.novelviewer.auth.dto.AuthDto;
 import com.ian.novelviewer.common.exception.CustomException;
-import com.ian.novelviewer.common.exception.ErrorCode;
 import com.ian.novelviewer.common.security.JwtProvider;
 import com.ian.novelviewer.user.domain.User;
 import com.ian.novelviewer.user.domain.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,13 +22,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
-    /**
-     * 회원가입을 처리하고 자동 로그인 방식으로 토큰을 포함한 응답을 반환합니다.
-     *
-     * @param request 회원가입 요청 DTO
-     * @return 회원 정보 + JWT 토큰
-     */
-    public AuthDto.AuthResponse signup(AuthDto.SignUp request) {
+    @Transactional
+    public AuthDto.SignUpResponse signup(AuthDto.SignUpRequest request) {
         log.info("회원가입 요청: {}", request.getLoginId());
 
         if (userRepository.existsByLoginId(request.getLoginId())) {
@@ -41,27 +36,16 @@ public class AuthService {
             throw new CustomException(DUPLICATE_EMAIL);
         }
 
-        request.setPassword(passwordEncoder.encode(request.getPassword()));
+        User user = AuthDto.SignUpRequest.from(request);
+        user.encodingPassword(passwordEncoder.encode(request.getPassword()));
 
-        User user = AuthDto.SignUp.from(request);
         User result = userRepository.save(user);
-
         log.info("회원 저장 완료: {}", result.getLoginId());
 
-        String token = jwtProvider.generateToken(result.getLoginId(), result.getRoles());
-
-        log.info("토큰 발급 완료");
-
-        return AuthDto.AuthResponse.from(result, token);
+        return AuthDto.SignUpResponse.from(result);
     }
 
-    /**
-     * 로그인 요청을 처리하고 인증 성공 시 JWT 토큰과 사용자 정보를 반환합니다.
-     *
-     * @param request 로그인 요청 DTO
-     * @return 회원 정보 + JWT 토큰
-     */
-    public AuthDto.AuthResponse signin(AuthDto.SignIn request) {
+    public AuthDto.SignInResponse signin(AuthDto.SignInRequest request) {
         log.info("로그인 요청: {}", request.getLoginId());
 
         User user = userRepository.findByLoginId(request.getLoginId())
@@ -79,6 +63,6 @@ public class AuthService {
 
         log.info("로그인 성공");
 
-        return AuthDto.AuthResponse.from(user, token);
+        return AuthDto.SignInResponse.from(user, token);
     }
 }
