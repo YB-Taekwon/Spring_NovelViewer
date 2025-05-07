@@ -48,4 +48,13 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     private List<Role> roles = new ArrayList<>();
+
+    /**
+     * 암호화 된 비밀번호를 DB에 저장
+     *
+     * @param encodedPassword 서비스에서 암호화 된 비밀번호
+     */
+    public void encodingPassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

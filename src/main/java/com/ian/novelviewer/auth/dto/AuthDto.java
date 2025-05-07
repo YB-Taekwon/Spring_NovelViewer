@@ -18,7 +18,7 @@ public class AuthDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class SignUp {
+    public static class SignUpRequest {
 
         @NotBlank(message = "아이디를 입력해주세요.")
         private String loginId;
@@ -36,15 +36,15 @@ public class AuthDto {
         /**
          * 회원가입 DTO를 User Entity로 변환합니다.
          *
-         * @param signUp 회원가입 DTO
+         * @param request 회원가입 DTO
          * @return User Entity
          */
-        public static User from(AuthDto.SignUp signUp) {
+        public static User from(SignUpRequest request) {
             return User.builder()
-                    .loginId(signUp.loginId)
-                    .password(signUp.password)
-                    .email(signUp.email)
-                    .realname(signUp.realname)
+                    .loginId(request.loginId)
+                    .password(request.password)
+                    .email(request.email)
+                    .realname(request.realname)
                     .roles(List.of(Role.ROLE_USER))
                     .build();
         }
@@ -58,7 +58,7 @@ public class AuthDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class AuthResponse {
+    public static class SignUpResponse {
         private String loginId;
         private String email;
         private String realname;
@@ -68,17 +68,15 @@ public class AuthDto {
         /**
          * User Entity 와 토큰을 기반으로 응답 DTO 를 생성합니다.
          *
-         * @param user  User Entity
-         * @param token 토큰
+         * @param user User Entity
          * @return 응답 DTO
          */
-        public static AuthDto.AuthResponse from(User user, String token) {
-            return AuthResponse.builder()
+        public static AuthDto.SignUpResponse from(User user) {
+            return SignUpResponse.builder()
                     .loginId(user.getLoginId())
                     .email(user.getEmail())
                     .realname(user.getRealname())
                     .roles(user.getRoles())
-                    .token(token)
                     .build();
         }
     }

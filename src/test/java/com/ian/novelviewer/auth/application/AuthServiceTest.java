@@ -39,7 +39,7 @@ class AuthServiceTest {
     @DisplayName("회원가입 성공")
     void signup_success() {
         // given
-        AuthDto.SignUp request = AuthDto.SignUp.builder()
+        AuthDto.SignUpRequest request = AuthDto.SignUpRequest.builder()
                 .loginId("hong123")
                 .password("pass1234")
                 .email("hong@example.com")
@@ -63,7 +63,7 @@ class AuthServiceTest {
         given(jwtProvider.generateToken("hong123", List.of(ROLE_USER))).willReturn("testToken");
 
         // when
-        AuthDto.AuthResponse response = authService.signup(request);
+        AuthDto.SignUpResponse response = authService.signup(request);
 
         // then
         assertThat(response.getLoginId()).isEqualTo("hong123");
@@ -79,7 +79,7 @@ class AuthServiceTest {
         // given
         given(userRepository.existsByLoginId("hong123")).willReturn(true);
 
-        AuthDto.SignUp request = AuthDto.SignUp.builder()
+        AuthDto.SignUpRequest request = AuthDto.SignUpRequest.builder()
                 .loginId("hong123") // 중복 아이디
                 .password("pass1234")
                 .email("new@example.com")
@@ -96,7 +96,7 @@ class AuthServiceTest {
         // given
         given(userRepository.existsByEmail("hong@example.com")).willReturn(true);
 
-        AuthDto.SignUp request = AuthDto.SignUp.builder()
+        AuthDto.SignUpRequest request = AuthDto.SignUpRequest.builder()
                 .loginId("hong1234")
                 .password("pass1234")
                 .email("hong@example.com") // 중복 이메일

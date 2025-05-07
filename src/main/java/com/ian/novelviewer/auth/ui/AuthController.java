@@ -26,8 +26,9 @@ public class AuthController {
      * @return 회원가입 응답 DTO (토큰 포함)
      */
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody @Valid AuthDto.SignUp request) {
-        AuthDto.AuthResponse response = authService.signup(request);
+    public ResponseEntity<?> signup(@RequestBody @Valid AuthDto.SignUpRequest request) {
+        AuthDto.SignUpResponse response = authService.signup(request);
+
         return ResponseEntity.ok(response);
     }
 }

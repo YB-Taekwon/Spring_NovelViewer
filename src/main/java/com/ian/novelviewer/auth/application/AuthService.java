@@ -20,13 +20,13 @@ public class AuthService {
     private final JwtProvider jwtProvider;
 
     /**
-     * 회원가입을 처리하고 자동 로그인을 하여 토큰을 반환합니다.
+     * 회원가입을 처리합니다.
      *
      * @param request 회원가입 요청 DTO
      * @return AuthResponse (회원 정보 + 토큰)
      */
     @Transactional
-    public AuthDto.AuthResponse signup(AuthDto.SignUp request) {
+    public AuthDto.SignUpResponse signup(AuthDto.SignUpRequest request) {
         log.info("회원가입 요청: {}", request.getLoginId());
 
         if (userRepository.existsByLoginId(request.getLoginId()))
@@ -35,17 +35,12 @@ public class AuthService {
         if (userRepository.existsByEmail(request.getEmail()))
             throw new RuntimeException("이미 가입된 이메일입니다.");
 
-        request.setPassword(passwordEncoder.encode(request.getPassword()));
+        User user = AuthDto.SignUpRequest.from(request);
+        user.encodingPassword(passwordEncoder.encode(request.getPassword()));
 
-        User user = AuthDto.SignUp.from(request);
         User result = userRepository.save(user);
-
         log.info("회원 저장 완료: {}", result.getLoginId());
 
-        String token = jwtProvider.generateToken(result.getLoginId(), result.getRoles());
-
-        log.info("토큰 발급 완료");
-
-        return AuthDto.AuthResponse.from(result, token);
+        return AuthDto.SignUpResponse.from(result);
     }
 }
