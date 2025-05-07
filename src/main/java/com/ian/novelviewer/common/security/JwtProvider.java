@@ -29,8 +29,9 @@ public class JwtProvider {
     private long tokenValidityInMs;
 
     // Base64 인코딩 된 시크릿 키 - application.properties에서 주입
-    @Value("${spring.jwt.secret}")
+    @Value("${spring.jwt.secret-key}")
     private String secretKeyStr;
+  
     // JWT 서명 용 시크릿 키
     private SecretKey secretKey;
 
