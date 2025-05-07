@@ -17,6 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 /**
  * JWT 인증 필터입니다.
  * 매 요청마다 JWT 를 검사하여 인증 정보를 SecurityContext 에 설정합니다.
@@ -26,7 +28,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    public static final String TOKEN_HEADER = "Authorization";
+    public static final String TOKEN_HEADER = AUTHORIZATION;
     public static final String TOKEN_PREFIX = "Bearer ";
 
     private final JwtProvider jwtProvider;
