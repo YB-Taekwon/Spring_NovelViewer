@@ -26,7 +26,6 @@ public class User extends BaseEntity {
     private String loginId;
 
     // 사용자 비밀번호 (암호화 하여 저장) - JSON 응답에서 제외, 필수값
-    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
