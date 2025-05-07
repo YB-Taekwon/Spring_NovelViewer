@@ -51,6 +51,23 @@ public class AuthDto {
     }
 
     /**
+     * 로그인 요청 DTO
+     */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SignIn {
+
+        @NotBlank(message = "아이디를 입력해주세요.")
+        private String loginId;
+
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        private String password;
+    }
+
+    /**
      * 회원가입/로그인 응답 DTO
      */
     @Getter
