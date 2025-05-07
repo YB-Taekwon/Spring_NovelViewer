@@ -2,8 +2,8 @@ package com.ian.novelviewer.auth.application;
 
 import com.ian.novelviewer.auth.dto.AuthDto;
 import com.ian.novelviewer.common.security.JwtProvider;
-import com.ian.novelviewer.user.User;
-import com.ian.novelviewer.user.UserRepository;
+import com.ian.novelviewer.user.domain.User;
+import com.ian.novelviewer.user.domain.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.ian.novelviewer.common.enums.Role.ROLE_USER;
 import static org.assertj.core.api.Assertions.assertThat;

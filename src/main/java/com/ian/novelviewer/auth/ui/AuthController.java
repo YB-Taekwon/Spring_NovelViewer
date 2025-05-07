@@ -43,7 +43,4 @@ public class AuthController {
     public ResponseEntity<?> signin(@RequestBody @Valid AuthDto.SignIn request) {
         log.info("로그인 요청 수신: {}", request.getLoginId());
         AuthDto.AuthResponse response = authService.signin(request);
-
-        return ResponseEntity.ok(response);
-    }
 }
