@@ -44,7 +44,7 @@ public class AdminService {
             throw new CustomException(ALREADY_HAS_ROLE);
         }
 
-        user.setNickname(request.getNickname());
+        user.authorName(request.getNickname());
         user.addRole(ROLE_AUTHOR);
 
         log.info("작가 권한 승인 완료");

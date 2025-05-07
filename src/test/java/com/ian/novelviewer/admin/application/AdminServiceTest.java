@@ -91,7 +91,7 @@ class AdminServiceTest {
     @DisplayName("권한 부여 실패 - 이미 권한이 존재")
     void approve_fail_already_has_role() {
         // given
-        user.setRoles(new ArrayList<>(List.of(ROLE_USER, ROLE_AUTHOR)));
+        user.addRole(ROLE_AUTHOR);
 
         RoleApprovalDto.Request request = RoleApprovalDto.Request.builder()
                 .loginId("testId")

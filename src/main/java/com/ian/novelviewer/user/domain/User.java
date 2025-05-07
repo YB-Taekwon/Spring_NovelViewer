@@ -38,4 +38,13 @@ public class User extends BaseEntity {
     public void encodingPassword(String encodedPassword) {
         this.password = encodedPassword;
     }
+
+    public void authorName(String authorName) {
+        this.nickname = authorName;
+    }
+
+    public void addRole(Role role) {
+        if (!roles.contains(role))
+            this.roles.add(role);
+    }
 }
