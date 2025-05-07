@@ -10,7 +10,10 @@ public enum ErrorCode {
     DUPLICATE_LOGIN_ID("이미 사용 중인 아이디입니다.", HttpStatus.CONFLICT),
     DUPLICATE_EMAIL("이미 가입된 이메일입니다.", HttpStatus.CONFLICT),
     USER_NOT_FOUND("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    ALREADY_HAS_ROLE("이미 해당 권한을 보유하고 있습니다.", HttpStatus.BAD_REQUEST);
+    ALREADY_HAS_ROLE("이미 해당 권한을 보유하고 있습니다.", HttpStatus.BAD_REQUEST),
+    S3_UPLOAD_FAILED("이미지 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    S3_ROLLBACK_FAILED("이미지 삭제에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    NOVEL_CREATION_FAILED("작품 등록에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String message;
     private final HttpStatus status;
