@@ -40,7 +40,7 @@ class AuthServiceTest {
     @DisplayName("회원가입 성공")
     void signup_success() {
         // given
-        AuthDto.SignUp request = AuthDto.SignUp.builder()
+        AuthDto.SignUpRequest request = AuthDto.SignUpRequest.builder()
                 .loginId("hong123")
                 .password("pass1234")
                 .email("hong@example.com")
@@ -61,17 +61,15 @@ class AuthServiceTest {
         given(userRepository.existsByEmail("hong@example.com")).willReturn(false);
         given(passwordEncoder.encode("pass1234")).willReturn(encodedPassword);
         given(userRepository.save(any(User.class))).willReturn(user);
-        given(jwtProvider.generateToken("hong123", List.of(ROLE_USER))).willReturn("testToken");
 
         // when
-        AuthDto.AuthResponse response = authService.signup(request);
+        AuthDto.SignUpResponse response = authService.signup(request);
 
         // then
         assertThat(response.getLoginId()).isEqualTo("hong123");
         assertThat(response.getEmail()).isEqualTo("hong@example.com");
         assertThat(response.getRealname()).isEqualTo("홍길동");
         assertThat(response.getRoles()).containsExactly(ROLE_USER);
-        assertThat(response.getToken()).isEqualTo("testToken");
     }
 
     @Test
@@ -80,7 +78,7 @@ class AuthServiceTest {
         // given
         given(userRepository.existsByLoginId("hong123")).willReturn(true);
 
-        AuthDto.SignUp request = AuthDto.SignUp.builder()
+        AuthDto.SignUpRequest request = AuthDto.SignUpRequest.builder()
                 .loginId("hong123") // 중복 아이디
                 .password("pass1234")
                 .email("new@example.com")
@@ -97,7 +95,7 @@ class AuthServiceTest {
         // given
         given(userRepository.existsByEmail("hong@example.com")).willReturn(true);
 
-        AuthDto.SignUp request = AuthDto.SignUp.builder()
+        AuthDto.SignUpRequest request = AuthDto.SignUpRequest.builder()
                 .loginId("hong1234")
                 .password("pass1234")
                 .email("hong@example.com") // 중복 이메일
@@ -114,7 +112,7 @@ class AuthServiceTest {
     @DisplayName("로그인 성공")
     void signin_success() {
         // given
-        AuthDto.SignIn request = AuthDto.SignIn.builder()
+        AuthDto.SignInRequest request = AuthDto.SignInRequest.builder()
                 .loginId("hong123")
                 .password("pass1234")
                 .build();
@@ -134,7 +132,7 @@ class AuthServiceTest {
         given(jwtProvider.generateToken("hong123", List.of(ROLE_USER))).willReturn("testToken");
 
         // when
-        AuthDto.AuthResponse response = authService.signin(request);
+        AuthDto.SignInResponse response = authService.signin(request);
 
         // then
         assertThat(response.getLoginId()).isEqualTo("hong123");
@@ -150,7 +148,7 @@ class AuthServiceTest {
         // given
         given(userRepository.findByLoginId("invalidId")).willReturn(Optional.empty());
 
-        AuthDto.SignIn request = AuthDto.SignIn.builder()
+        AuthDto.SignInRequest request = AuthDto.SignInRequest.builder()
                 .loginId("invalidId")
                 .password("pass1234")
                 .build();
@@ -163,7 +161,7 @@ class AuthServiceTest {
     @DisplayName("로그인 실패 - 비밀번호 불일치")
     void signin_fail_wrong_password() {
         // given
-        AuthDto.SignIn request = AuthDto.SignIn.builder()
+        AuthDto.SignInRequest request = AuthDto.SignInRequest.builder()
                 .loginId("hong123")
                 .password("pass1234")
                 .build();
