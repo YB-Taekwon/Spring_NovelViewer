@@ -34,6 +34,25 @@ public class NovelDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class NovelResponse {
+
+        private String thumbnail;
+        private String title;
+        private String author;
+
+        public static NovelResponse from(Novel novel) {
+            return NovelResponse.builder()
+                    .thumbnail(novel.getThumbnail())
+                    .title(novel.getTitle())
+                    .author(novel.getAuthor().getNickname())
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class NovelInfoResponse {
 
         private Long contentId;
