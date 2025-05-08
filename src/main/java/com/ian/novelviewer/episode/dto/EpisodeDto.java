@@ -25,6 +25,15 @@ public class EpisodeDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class UpdateEpisodeRequest {
+        private String title;
+        private String content;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class EpisodeTitleResponse {
         private Long id;
         private String title;

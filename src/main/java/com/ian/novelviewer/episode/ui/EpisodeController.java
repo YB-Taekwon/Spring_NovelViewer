@@ -57,4 +57,18 @@ public class EpisodeController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/{episodeId}")
+    @PreAuthorize("hasRole('AUTHOR')")
+    public ResponseEntity<?> updateEpisode(
+            @PathVariable Long contentId,
+            @PathVariable Long episodeId,
+            @RequestBody EpisodeDto.UpdateEpisodeRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        log.info("회차 수정 요청: {}", episodeId);
+        EpisodeDto.EpisodeInfoResponse response = episodeService.updateEpisode(contentId, episodeId, request, user);
+
+        return ResponseEntity.ok(response);
+    }
 }
