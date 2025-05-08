@@ -130,4 +130,26 @@ public class NovelController {
             throw new CustomException(NOVEL_CREATION_FAILED);
         }
     }
+
+    @DeleteMapping("/{contentId}")
+    @PreAuthorize("hasRole('AUTHOR')")
+    public ResponseEntity<?> deleteNovel(
+            @PathVariable Long contentId, @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        try {
+            log.info("작품 삭제 요청: {}", contentId);
+            String thumbnail = novelService.getNovel(contentId).getThumbnail();
+            novelService.deleteNovel(contentId, user);
+
+            if (thumbnail != null) {
+                log.info("섬네일 삭제 요청: {}", thumbnail);
+                s3Service.delete(thumbnail);
+            }
+
+            return ResponseEntity.ok("작품을 삭제했습니다.");
+        } catch (Exception ex) {
+            log.error("작품 삭제 중 예외 발생", ex);
+            throw new CustomException(NOVEL_DELETE_FAILED);
+        }
+    }
 }

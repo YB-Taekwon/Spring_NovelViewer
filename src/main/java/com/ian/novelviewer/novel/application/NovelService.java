@@ -121,4 +121,21 @@ public class NovelService {
 
         return NovelDto.NovelInfoResponse.from(novel);
     }
+
+    @Transactional
+    public void deleteNovel(Long contentId, CustomUserDetails user) {
+        Novel novel = novelRepository.findByContentId(contentId)
+                .orElseThrow(() -> {
+                    log.error("작품을 찾을 수 없습니다. {}", contentId);
+                    return new CustomException(NOVEL_NOT_FOUND);
+                });
+
+        if (!novel.getAuthor().getLoginId().equals(user.getUser().getLoginId())) {
+            log.error("작품 삭제 권한 없음: {}", user.getUser().getLoginId());
+            throw new CustomException(NO_PERMISSION);
+        }
+
+        novelRepository.deleteByContentId(contentId);
+        log.info("삭제 성공");
+    }
 }

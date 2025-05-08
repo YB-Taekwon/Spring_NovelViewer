@@ -21,4 +21,6 @@ public interface NovelRepository extends JpaRepository<Novel, Long> {
                    or u.nickname like concat('%', :keyword, '%')
             """)
     Page<Novel> findByTitleOrAuthorName(String keyword, Pageable pageable);
+
+    void deleteByContentId(Long contentId);
 }
