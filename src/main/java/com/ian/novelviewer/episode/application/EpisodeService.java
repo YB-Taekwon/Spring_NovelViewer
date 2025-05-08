@@ -1,7 +1,6 @@
 package com.ian.novelviewer.episode.application;
 
 import com.ian.novelviewer.common.exception.CustomException;
-import com.ian.novelviewer.common.exception.ErrorCode;
 import com.ian.novelviewer.common.security.CustomUserDetails;
 import com.ian.novelviewer.episode.domain.Episode;
 import com.ian.novelviewer.episode.domain.EpisodeRepository;
@@ -11,6 +10,8 @@ import com.ian.novelviewer.novel.domain.NovelRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import static com.ian.novelviewer.common.exception.ErrorCode.*;
@@ -23,17 +24,21 @@ public class EpisodeService {
     private final NovelRepository novelRepository;
     private final EpisodeRepository episodeRepository;
 
+    public Page<EpisodeDto.EpisodeTitleResponse> getAllEpisodes(Long contentId, Pageable pageable) {
+        Novel novel = getNovel(contentId);
+
+        Page<Episode> episodes = episodeRepository.findByNovel(novel, pageable);
+
+        return episodes.map(EpisodeDto.EpisodeTitleResponse::from);
+    }
+
     @Transactional
     public EpisodeDto.EpisodeInfoResponse createEpisode(
             Long contentId, EpisodeDto.CreateEpisodeRequest request, CustomUserDetails user
     ) {
         log.info("회차 등록 처리: {}", request.getTitle());
 
-        Novel novel = novelRepository.findByContentId(contentId)
-                .orElseThrow(() -> {
-                    log.error("존재하지 않는 작품: {}", contentId);
-                    return new CustomException(NOVEL_NOT_FOUND);
-                });
+        Novel novel = getNovel(contentId);
 
         if (!novel.getAuthor().getLoginId().equals(user.getUsername())) {
             log.error("회차 등록 권한 없음 - 작가: {}, 작성자: {}", novel.getAuthor().getLoginId(), user.getUsername());
@@ -54,11 +59,7 @@ public class EpisodeService {
     }
 
     public EpisodeDto.EpisodeContentResponse getEpisode(Long contentId, Long episodeId) {
-        Novel novel = novelRepository.findByContentId(contentId)
-                .orElseThrow(() -> {
-                    log.error("존재하지 않는 작품: {}", contentId);
-                    return new CustomException(NOVEL_NOT_FOUND);
-                });
+        Novel novel = getNovel(contentId);
 
         Episode episode = episodeRepository.findById(episodeId)
                 .orElseThrow(() -> {
@@ -72,5 +73,14 @@ public class EpisodeService {
         }
 
         return EpisodeDto.EpisodeContentResponse.from(episode);
+    }
+
+    private Novel getNovel(Long contentId) {
+        Novel novel = novelRepository.findByContentId(contentId)
+                .orElseThrow(() -> {
+                    log.error("존재하지 않는 작품: {}", contentId);
+                    return new CustomException(NOVEL_NOT_FOUND);
+                });
+        return novel;
     }
 }
