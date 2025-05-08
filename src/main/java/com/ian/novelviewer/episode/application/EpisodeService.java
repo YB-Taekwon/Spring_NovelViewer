@@ -1,5 +1,6 @@
 package com.ian.novelviewer.episode.application;
 
+import com.ian.novelviewer.common.enums.Role;
 import com.ian.novelviewer.common.exception.CustomException;
 import com.ian.novelviewer.common.security.CustomUserDetails;
 import com.ian.novelviewer.episode.domain.Episode;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import static com.ian.novelviewer.common.enums.Role.ROLE_ADMIN;
 import static com.ian.novelviewer.common.exception.ErrorCode.*;
 
 @Slf4j
@@ -116,5 +118,29 @@ public class EpisodeService {
                     log.error("존재하지 않는 회차: {}", episodeId);
                     return new CustomException(EPISODE_NOT_FOUND);
                 });
+    }
+
+    @Transactional
+    public void deleteEpisode(Long contentId, Long episodeId, CustomUserDetails user) {
+        log.info("회차 삭제 처리 - 작품: {}, 회차: {}", contentId, episodeId);
+        Novel novel = getNovel(contentId);
+
+        boolean isAdmin = user.getUser().getRoles().contains(ROLE_ADMIN);
+        boolean isAuthor = novel.getAuthor().getLoginId().equals(user.getUsername());
+
+        if (!isAdmin && !isAuthor) {
+            log.error("회차 삭제 권한 없음 - 작가: {}, 요청자: {}", novel.getAuthor().getLoginId(), user.getUsername());
+            throw new CustomException(NO_PERMISSION);
+        }
+
+        Episode episode = getEpisode(episodeId);
+
+        if (!episode.getNovel().getContentId().equals(novel.getContentId())) {
+            log.error("회차가 해당 작품에 속하지 않음 - 작품: {}, 회차: {}", contentId, episodeId);
+            throw new CustomException(EPISODE_NOT_FOUND);
+        }
+
+        episodeRepository.delete(episode);
+        log.info("회차 삭제 성공");
     }
 }

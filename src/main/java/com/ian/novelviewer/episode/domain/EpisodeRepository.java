@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EpisodeRepository extends JpaRepository<Episode, Long> {
     Page<Episode> findByNovel(Novel novel, Pageable pageable);
+
+    boolean existsById(Long episodeId);
 }

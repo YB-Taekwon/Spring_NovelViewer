@@ -71,4 +71,17 @@ public class EpisodeController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{episodeId}")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
+    public ResponseEntity<?> deleteEpisode(
+            @PathVariable Long contentId,
+            @PathVariable Long episodeId,
+            @AuthenticationPrincipal CustomUserDetails user
+
+    ) {
+        episodeService.deleteEpisode(contentId, episodeId, user);
+
+        return ResponseEntity.ok("회차 삭제가 완료되었습니다.");
+    }
 }
