@@ -14,7 +14,8 @@ public enum ErrorCode {
     S3_UPLOAD_FAILED("이미지 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     S3_ROLLBACK_FAILED("이미지 삭제에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     NOVEL_CREATION_FAILED("작품 등록에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    NOVEL_NOT_FOUND("해당 작품을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    NOVEL_NOT_FOUND("해당 작품을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_KEYWORD("검색어가 입력되지 않았습니다.", HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final HttpStatus status;
