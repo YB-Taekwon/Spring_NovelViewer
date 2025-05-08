@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -37,6 +36,15 @@ public class User extends BaseEntity {
     private List<Role> roles = new ArrayList<>();
 
     public void encodingPassword(String encodedPassword) {
-        this.password = encodedPassword;
+        password = encodedPassword;
+    }
+
+    public void addAuthorName(String authorName) {
+        nickname = authorName;
+    }
+
+    public void addRole(Role role) {
+        if (!roles.contains(role))
+            roles.add(role);
     }
 }
