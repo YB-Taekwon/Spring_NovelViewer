@@ -54,4 +54,13 @@ public class NovelController {
             throw new CustomException(NOVEL_CREATION_FAILED);
         }
     }
+
+    @GetMapping("/{contentId}")
+    public ResponseEntity<?> getNovel(@PathVariable Long contentId) {
+        NovelDto.NovelInfoResponse novel = novelService.getNovel(contentId);
+
+        return ResponseEntity.ok(novel);
+    }
+
+
 }

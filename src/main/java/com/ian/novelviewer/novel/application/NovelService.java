@@ -1,5 +1,7 @@
 package com.ian.novelviewer.novel.application;
 
+import com.ian.novelviewer.common.exception.CustomException;
+import com.ian.novelviewer.common.exception.ErrorCode;
 import com.ian.novelviewer.common.security.CustomUserDetails;
 import com.ian.novelviewer.novel.domain.Novel;
 import com.ian.novelviewer.novel.domain.NovelRepository;
@@ -10,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+
+import static com.ian.novelviewer.common.exception.ErrorCode.NOVEL_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -42,5 +46,15 @@ public class NovelService {
         UUID uuid = UUID.randomUUID();
 
         return Math.abs(uuid.getMostSignificantBits());
+    }
+
+    public NovelDto.NovelInfoResponse getNovel(Long contentId) {
+        Novel novel = novelRepository.findByContentId(contentId)
+                .orElseThrow(() -> {
+                    log.warn("작품을 찾을 수 없습니다. {}", contentId);
+                    return new CustomException(NOVEL_NOT_FOUND);
+                });
+
+        return NovelDto.NovelInfoResponse.from(novel);
     }
 }
