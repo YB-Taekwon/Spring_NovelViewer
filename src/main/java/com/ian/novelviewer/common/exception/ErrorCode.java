@@ -17,7 +17,9 @@ public enum ErrorCode {
     NOVEL_NOT_FOUND("해당 작품을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_KEYWORD("검색어가 입력되지 않았습니다.", HttpStatus.BAD_REQUEST),
     NOVEL_UPDATE_FAILED("작품 수정에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    NO_PERMISSION("해당 작업을 수행할 권한이 없습니다.", HttpStatus.FORBIDDEN);
+    NO_PERMISSION("해당 작업을 수행할 권한이 없습니다.", HttpStatus.FORBIDDEN),
+    NOVEL_DELETE_FAILED("작품 삭제에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    ;
 
     private final String message;
     private final HttpStatus status;
