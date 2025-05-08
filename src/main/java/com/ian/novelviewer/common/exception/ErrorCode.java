@@ -19,6 +19,7 @@ public enum ErrorCode {
     NOVEL_UPDATE_FAILED("작품 수정에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     NO_PERMISSION("해당 작업을 수행할 권한이 없습니다.", HttpStatus.FORBIDDEN),
     NOVEL_DELETE_FAILED("작품 삭제에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    EPISODE_NOT_FOUND("해당 회차 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ;
 
     private final String message;
