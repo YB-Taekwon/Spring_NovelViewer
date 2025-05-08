@@ -25,6 +25,20 @@ public class EpisodeDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class EpisodeContentResponse {
+        private String content;
+
+        public static EpisodeContentResponse from(Episode episode) {
+            return EpisodeContentResponse.builder()
+                    .content(episode.getContent())
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class EpisodeInfoResponse {
         private Long id;
         private String title;

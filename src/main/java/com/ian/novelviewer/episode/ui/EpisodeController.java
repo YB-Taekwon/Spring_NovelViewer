@@ -32,4 +32,13 @@ public class EpisodeController {
         log.info("등록된 회차 반환: {}", response.getTitle());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{episodeId}")
+    public ResponseEntity<?> getEpisode(
+            @PathVariable Long contentId, @PathVariable Long episodeId
+    ) {
+        EpisodeDto.EpisodeContentResponse response = episodeService.getEpisode(contentId, episodeId);
+
+        return ResponseEntity.ok(response);
+    }
 }

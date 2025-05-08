@@ -13,8 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static com.ian.novelviewer.common.exception.ErrorCode.NOVEL_NOT_FOUND;
-import static com.ian.novelviewer.common.exception.ErrorCode.NO_PERMISSION;
+import static com.ian.novelviewer.common.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -52,5 +51,26 @@ public class EpisodeService {
         log.info("회차 등록 성공: {}", episode.getTitle());
 
         return EpisodeDto.EpisodeInfoResponse.from(episode);
+    }
+
+    public EpisodeDto.EpisodeContentResponse getEpisode(Long contentId, Long episodeId) {
+        Novel novel = novelRepository.findByContentId(contentId)
+                .orElseThrow(() -> {
+                    log.error("존재하지 않는 작품: {}", contentId);
+                    return new CustomException(NOVEL_NOT_FOUND);
+                });
+
+        Episode episode = episodeRepository.findById(episodeId)
+                .orElseThrow(() -> {
+                    log.error("존재하지 않는 회차: {}", episodeId);
+                    return new CustomException(EPISODE_NOT_FOUND);
+                });
+
+        if (!episode.getNovel().getContentId().equals(novel.getContentId())) {
+            log.error("회차가 해당 작품에 속하지 않음: episodeId={}, contentId={}", episodeId, contentId);
+            throw new CustomException(EPISODE_NOT_FOUND);
+        }
+
+        return EpisodeDto.EpisodeContentResponse.from(episode);
     }
 }
