@@ -16,8 +16,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.UUID;
 
-import static com.ian.novelviewer.common.exception.ErrorCode.INVALID_KEYWORD;
-import static com.ian.novelviewer.common.exception.ErrorCode.NOVEL_NOT_FOUND;
+import static com.ian.novelviewer.common.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -82,6 +81,43 @@ public class NovelService {
                     log.warn("작품을 찾을 수 없습니다. {}", contentId);
                     return new CustomException(NOVEL_NOT_FOUND);
                 });
+
+        return NovelDto.NovelInfoResponse.from(novel);
+    }
+
+    @Transactional
+    public NovelDto.NovelInfoResponse updateNovel(
+            Long contentId, NovelDto.UpdateNovelRequest request, String imageKey, CustomUserDetails user
+    ) {
+        Novel novel = novelRepository.findByContentId(contentId)
+                .orElseThrow(() -> {
+                    log.error("존재하지 않는 작품: {}", contentId);
+                    return new CustomException(NOVEL_NOT_FOUND);
+                });
+
+        if (!novel.getAuthor().getLoginId().equals(user.getUser().getLoginId())) {
+            throw new CustomException(NO_PERMISSION);
+        }
+
+        if (StringUtils.hasText(imageKey)) {
+            log.info("섬네일 변경: {}", imageKey);
+            novel.changeThumbnail(imageKey);
+        }
+
+        if (request.getTitle() != null && !request.getTitle().isEmpty()) {
+            log.info("제목 변경: {}", request.getTitle());
+            novel.changeTitle(request.getTitle());
+        }
+
+        if (request.getDescription() != null && !request.getDescription().isEmpty()) {
+            log.info("소개글 변경: {}", request.getDescription());
+            novel.changeDescription(request.getDescription());
+        }
+
+        if (request.getCategory() != null) {
+            log.info("카테고리 변경: {}", request.getCategory());
+            novel.changeCategory(request.getCategory());
+        }
 
         return NovelDto.NovelInfoResponse.from(novel);
     }

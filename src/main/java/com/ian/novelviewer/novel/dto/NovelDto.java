@@ -34,6 +34,16 @@ public class NovelDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class UpdateNovelRequest {
+        private String title;
+        private String description;
+        private Category category;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class NovelResponse {
 
         private String thumbnail;

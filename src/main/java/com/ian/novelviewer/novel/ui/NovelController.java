@@ -8,6 +8,7 @@ import com.ian.novelviewer.novel.domain.Category;
 import com.ian.novelviewer.novel.dto.NovelDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import java.io.IOException;
 
 import static com.ian.novelviewer.common.exception.ErrorCode.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/novels")
 @RequiredArgsConstructor
@@ -88,5 +90,44 @@ public class NovelController {
         NovelDto.NovelInfoResponse novel = novelService.getNovel(contentId);
 
         return ResponseEntity.ok(novel);
+    }
+
+    @PreAuthorize("hasRole('AUTHOR')")
+    @PatchMapping(value = "/{contentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateNovel(
+            @PathVariable Long contentId,
+            @RequestPart(value = "novel", required = false) NovelDto.UpdateNovelRequest request,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile file,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        String oldImageKey = null;
+        String newImageKey = null;
+        try {
+            if (file != null && !file.isEmpty()) {
+                newImageKey = s3Service.upload(file, "thumbnails");
+                oldImageKey = novelService.getNovel(contentId).getThumbnail();
+
+                if (oldImageKey != null) {
+                    s3Service.delete(oldImageKey);
+                    log.info("기존 이미지 삭제 완료");
+                }
+            }
+
+            NovelDto.NovelInfoResponse response = novelService.updateNovel(contentId, request, newImageKey, user);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IOException e) {
+            throw new CustomException(S3_UPLOAD_FAILED);
+        } catch (Exception e) {
+            if (newImageKey != null) {
+                try {
+                    s3Service.delete(newImageKey);
+                } catch (Exception ex) {
+                    throw new CustomException(S3_ROLLBACK_FAILED);
+                }
+            }
+            throw new CustomException(NOVEL_CREATION_FAILED);
+        }
     }
 }
