@@ -8,7 +8,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
+
+import static com.ian.novelviewer.common.exception.ErrorCode.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Slf4j
 @RestControllerAdvice
@@ -16,37 +20,52 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
-
+        log.error("커스텀 예외 발생: {}", e.getMessage(), e);
         return ResponseEntity.status(e.getStatus()).body(ErrorResponse.from(e));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+        log.error("유효성 검증 중 오류 발생: {}", e.getMessage(), e);
+
         String errorMessage = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
-        log.error("커스텀 에러 발생: {}", errorMessage);
-
         ErrorResponse response = ErrorResponse.builder()
-                .errorCode("VALIDATION_ERROR")
+                .errorCode(VALIDATION_ERROR.getCode())
                 .message(errorMessage)
-                .status(HttpStatus.BAD_REQUEST.value())
+                .status(BAD_REQUEST.value())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<ErrorResponse> handleIOException(IOException e) {
+        log.error("파일 처리 중 예외 발생: {}", e.getMessage(), e);
+        ErrorCode error = FILE_PROCESSING_ERROR;
+
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(error.getCode())
+                .message(e.getMessage())
+                .status(error.getStatus().value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
         log.error("접근 거부 예외 발생: {}", e.getMessage(), e);
+        ErrorCode error = NO_PERMISSION;
 
         ErrorResponse response = ErrorResponse.builder()
-                .errorCode("ACCESS_DENIED")
-                .message("접근이 거부되었습니다.")
-                .status(HttpStatus.FORBIDDEN.value())
+                .errorCode(error.getCode())
+                .message(error.getMessage())
+                .status(error.getStatus().value())
                 .build();
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
@@ -55,15 +74,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
         log.error("서버 내부 오류 발생: {}", e.getMessage(), e);
-
-        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+        ErrorCode error = INTERNAL_SERVER_ERROR;
 
         ErrorResponse response = ErrorResponse.builder()
-                .errorCode(errorCode.getCode())
-                .message(errorCode.getMessage())
-                .status(errorCode.getStatus().value())
+                .errorCode(error.getCode())
+                .message(error.getMessage())
+                .status(error.getStatus().value())
                 .build();
 
-        return ResponseEntity.status(errorCode.getStatus()).body(response);
+        return ResponseEntity.status(error.getStatus()).body(response);
     }
 }

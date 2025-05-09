@@ -30,9 +30,24 @@ public class NovelDto {
         private Category category;
 
         @NotBlank
-        private String thumbnailKey;
+        private String thumbnail;
     }
-  
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class UpdateNovelRequest {
+
+        @Size(min = 2, max = 50)
+        private String title;
+
+        @Size(min = 2, max = 1000)
+        private String description;
+
+        private Category category;
+    }
+
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
