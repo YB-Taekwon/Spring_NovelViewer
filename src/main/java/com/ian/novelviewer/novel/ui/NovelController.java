@@ -8,6 +8,7 @@ import com.ian.novelviewer.novel.domain.Category;
 import com.ian.novelviewer.novel.dto.NovelDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
