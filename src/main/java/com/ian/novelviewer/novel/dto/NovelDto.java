@@ -28,6 +28,17 @@ public class NovelDto {
 
         @NotNull
         private Category category;
+
+        @NotBlank
+        private String thumbnailKey;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ThumbnailResponse {
+        private String thumbnailKey;
     }
 
     @Getter

@@ -20,15 +20,15 @@ public class NovelService {
 
     @Transactional
     public NovelDto.NovelInfoResponse createNovel(
-            NovelDto.CreateNovelRequest request, String imageKey, CustomUserDetails user
+            NovelDto.CreateNovelRequest request, CustomUserDetails user
     ) {
         Long contentId = generateContentId();
 
         Novel novel = novelRepository.save(
                 Novel.builder()
                         .contentId(contentId)
-                        .thumbnail(imageKey)
                         .title(request.getTitle())
+                        .thumbnail(request.getThumbnailKey())
                         .description(request.getDescription())
                         .category(request.getCategory())
                         .author(user.getUser())

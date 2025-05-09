@@ -1,5 +1,6 @@
 package com.ian.novelviewer.novel.application;
 
+import com.ian.novelviewer.novel.dto.NovelDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +31,7 @@ public class S3Service {
     @Value("${spring.cloud.aws.bucket}")
     private String bucket;
 
-    public String upload(MultipartFile file, String folderName) throws IOException {
+    public NovelDto.ThumbnailResponse upload(MultipartFile file, String folderName) throws IOException {
         log.info("이미지 업로드 요청 처리 - 파일명: {}, 폴더명: {}", file.getOriginalFilename(), folderName);
 
         String fileName = folderName + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -54,7 +55,11 @@ public class S3Service {
                         .signatureDuration(PRESIGNED_URL_DURATION)
         );
 
-        return presignedRequest.url().toString();
+        NovelDto.ThumbnailResponse thumbnailKey = NovelDto.ThumbnailResponse.builder()
+                .thumbnailKey(presignedRequest.url().toString())
+                .build();
+
+        return thumbnailKey;
     }
 
     public void delete(String key) throws IOException {
