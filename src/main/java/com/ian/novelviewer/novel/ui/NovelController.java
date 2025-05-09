@@ -4,10 +4,13 @@ import com.ian.novelviewer.common.exception.CustomException;
 import com.ian.novelviewer.common.security.CustomUserDetails;
 import com.ian.novelviewer.novel.application.NovelService;
 import com.ian.novelviewer.novel.application.S3Service;
+import com.ian.novelviewer.novel.domain.Category;
 import com.ian.novelviewer.novel.dto.NovelDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +32,34 @@ public class NovelController {
     private final S3Service s3Service;
 
     private static final String S3_FOLDER_NAME = "thumbnails";
+  
+   @GetMapping
+    public ResponseEntity<?> getAllNovels(
+            @RequestParam(name = "category", required = false) Category category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info("작품 목록 조회 요청");
+          
+        Pageable pageable = PageRequest.of(page, size);
+        Page<NovelDto.NovelResponse> responses = novelService.getAllNovels(category, pageable);
+
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchNovel(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info("검색 요청 - 키워드: {}", keyword);
+      
+        Pageable pageable = PageRequest.of(page, size);
+        Page<NovelDto.NovelResponse> responses = novelService.searchNovel(keyword, pageable);
+
+        return ResponseEntity.ok(responses);
+    }
 
     @PostMapping(
             value = "/thumbnails",

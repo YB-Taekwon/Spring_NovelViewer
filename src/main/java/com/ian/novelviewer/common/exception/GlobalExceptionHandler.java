@@ -55,6 +55,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
         log.error("서버 내부 오류 발생: {}", e.getMessage(), e);
+
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 
         ErrorResponse response = ErrorResponse.builder()
