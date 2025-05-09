@@ -32,4 +32,20 @@ public class Novel extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
+
+    public void changeThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
+
+    public void changeDescription(String description) {
+        this.description = description;
+    }
+
+    public void changeCategory(Category category) {
+        this.category = category;
+    }
 }

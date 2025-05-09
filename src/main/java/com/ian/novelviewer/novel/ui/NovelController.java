@@ -1,9 +1,7 @@
 package com.ian.novelviewer.novel.ui;
 
-import com.ian.novelviewer.common.exception.CustomException;
 import com.ian.novelviewer.common.security.CustomUserDetails;
 import com.ian.novelviewer.novel.application.NovelService;
-import com.ian.novelviewer.novel.application.S3Service;
 import com.ian.novelviewer.novel.domain.Category;
 import com.ian.novelviewer.novel.dto.NovelDto;
 import jakarta.validation.Valid;
@@ -21,8 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-import static com.ian.novelviewer.common.exception.ErrorCode.*;
-
 @Slf4j
 @RestController
 @RequestMapping("/novels")
@@ -30,21 +26,19 @@ import static com.ian.novelviewer.common.exception.ErrorCode.*;
 public class NovelController {
 
     private final NovelService novelService;
-    private final S3Service s3Service;
 
-    private static final String S3_FOLDER_NAME = "thumbnails";
-  
-   @GetMapping
+    @GetMapping
     public ResponseEntity<?> getAllNovels(
             @RequestParam(name = "category", required = false) Category category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        log.info("작품 목록 조회 요청");
-          
-        Pageable pageable = PageRequest.of(page, size);
+        log.info("전체 작품 목록 조회 요청");
+
+        Pageable pageable = getPageable(page, size);
         Page<NovelDto.NovelResponse> responses = novelService.getAllNovels(category, pageable);
 
+        log.info("전체 작품 목록 조회 완료");
         return ResponseEntity.ok(responses);
     }
 
@@ -55,10 +49,11 @@ public class NovelController {
             @RequestParam(defaultValue = "10") int size
     ) {
         log.info("검색 요청 - 키워드: {}", keyword);
-      
-        Pageable pageable = PageRequest.of(page, size);
+
+        Pageable pageable = getPageable(page, size);
         Page<NovelDto.NovelResponse> responses = novelService.searchNovel(keyword, pageable);
 
+        log.info("검색 완료");
         return ResponseEntity.ok(responses);
     }
 
@@ -68,21 +63,12 @@ public class NovelController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasRole('AUTHOR')")
-    public ResponseEntity<?> uploadThumbnail(
-            @RequestPart("thumbnail") MultipartFile file
-    ) {
-        try {
-            log.info("섬네일 업로드 요청: {}", file.getOriginalFilename());
-            NovelDto.ThumbnailResponse response = s3Service.upload(file, S3_FOLDER_NAME);
+    public ResponseEntity<?> uploadThumbnail(@RequestParam("thumbnail") MultipartFile file) throws IOException {
+        log.info("섬네일 업로드 요청: {}", file.getOriginalFilename());
+        NovelDto.ThumbnailResponse response = novelService.uploadThumbnail(file);
 
-            log.info("섬네일 업로드 성공: {}", response.getThumbnailKey());
-
-            return ResponseEntity.ok(response);
-
-        } catch (IOException e) {
-            log.error("섬네일 업로드 중 예외 발생: {}", e.getMessage());
-            throw new CustomException(S3_UPLOAD_FAILED);
-        }
+        log.info("섬네일 업로드 완료: {}", response.getThumbnailKey());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -103,6 +89,57 @@ public class NovelController {
         log.info("작품 조회 요청: {}", contentId);
         NovelDto.NovelInfoResponse novel = novelService.getNovel(contentId);
 
+        log.info("작품 조회 완료: {}", novel.getTitle());
         return ResponseEntity.ok(novel);
+    }
+
+    @PutMapping(
+            value = "/{contentId}/thumbnails",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasRole('AUTHOR')")
+    public ResponseEntity<?> updateThumbnail(
+            @PathVariable Long contentId,
+            @RequestParam("thumbnail") MultipartFile file,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) throws IOException {
+        log.info("섬네일 수정 요청: {}", file.getOriginalFilename());
+        NovelDto.NovelInfoResponse response = novelService.updateThumbnail(contentId, file, user);
+
+        log.info("섬네일 수정 완료: {}", response.getThumbnail());
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{contentId}")
+    @PreAuthorize("hasRole('AUTHOR')")
+    public ResponseEntity<?> updateNovel(
+            @PathVariable Long contentId,
+            @RequestBody NovelDto.UpdateNovelRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        log.info("작품 수정 요청: {}", contentId);
+        NovelDto.NovelInfoResponse response = novelService.updateNovel(contentId, request, user);
+
+        log.info("작품 수정 완료: {}", response.getTitle());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{contentId}")
+    @PreAuthorize("hasRole('AUTHOR')")
+    public ResponseEntity<?> deleteNovel(
+            @PathVariable Long contentId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) throws IOException {
+        log.info("작품 삭제 요청: {}", contentId);
+        novelService.deleteNovel(contentId, user);
+
+        log.info("작품 삭제 성공");
+        return ResponseEntity.ok("작품 삭제에 성공했습니다.");
+    }
+
+    private static Pageable getPageable(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return pageable;
     }
 }
