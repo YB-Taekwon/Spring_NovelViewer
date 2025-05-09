@@ -1,7 +1,6 @@
 package com.ian.novelviewer.novel.application;
 
 import com.ian.novelviewer.common.exception.CustomException;
-import com.ian.novelviewer.common.exception.ErrorCode;
 import com.ian.novelviewer.common.security.CustomUserDetails;
 import com.ian.novelviewer.novel.domain.Novel;
 import com.ian.novelviewer.novel.domain.NovelRepository;
@@ -24,21 +23,38 @@ public class NovelService {
 
     @Transactional
     public NovelDto.NovelInfoResponse createNovel(
-            NovelDto.CreateNovelRequest request, String imageKey, CustomUserDetails user
+            NovelDto.CreateNovelRequest request, CustomUserDetails user
     ) {
+        log.info("작품 등록 처리: {}", request.getTitle());
+
         Long contentId = generateContentId();
+        log.info("작품 고유 번호 생성: {}", contentId);
 
         Novel novel = novelRepository.save(
                 Novel.builder()
                         .contentId(contentId)
-                        .thumbnail(imageKey)
                         .title(request.getTitle())
+                        .thumbnail(request.getThumbnailKey())
                         .description(request.getDescription())
                         .category(request.getCategory())
                         .author(user.getUser())
                         .build()
         );
 
+        log.info("작품 등록 성공");
+        return NovelDto.NovelInfoResponse.from(novel);
+    }
+
+    public NovelDto.NovelInfoResponse getNovel(Long contentId) {
+        log.info("작품 조회 처리: {}", contentId);
+
+        Novel novel = novelRepository.findByContentId(contentId)
+                .orElseThrow(() -> {
+                    log.error("작품을 찾을 수 없습니다. {}", contentId);
+                    return new CustomException(NOVEL_NOT_FOUND);
+                });
+
+        log.info("작품 조회 성공: {}", novel.getTitle());
         return NovelDto.NovelInfoResponse.from(novel);
     }
 
@@ -46,15 +62,5 @@ public class NovelService {
         UUID uuid = UUID.randomUUID();
 
         return Math.abs(uuid.getMostSignificantBits());
-    }
-
-    public NovelDto.NovelInfoResponse getNovel(Long contentId) {
-        Novel novel = novelRepository.findByContentId(contentId)
-                .orElseThrow(() -> {
-                    log.warn("작품을 찾을 수 없습니다. {}", contentId);
-                    return new CustomException(NOVEL_NOT_FOUND);
-                });
-
-        return NovelDto.NovelInfoResponse.from(novel);
     }
 }
