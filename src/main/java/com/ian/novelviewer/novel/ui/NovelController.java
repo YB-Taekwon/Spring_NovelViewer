@@ -126,7 +126,7 @@ public class NovelController {
     }
 
     @DeleteMapping("/{novelId}")
-    @PreAuthorize("hasRole('AUTHOR')")
+    @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
     public ResponseEntity<?> deleteNovel(
             @PathVariable Long novelId,
             @AuthenticationPrincipal CustomUserDetails user
