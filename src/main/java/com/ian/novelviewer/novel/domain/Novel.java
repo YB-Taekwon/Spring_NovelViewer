@@ -14,7 +14,7 @@ import lombok.*;
 public class Novel extends BaseEntity {
 
     @Column(nullable = false, unique = true)
-    private Long contentId;
+    private Long novelId;
 
     @Column(name = "thumbnail", nullable = false, length = 1000)
     private String thumbnail;

@@ -72,12 +72,12 @@ public class NovelService {
     ) {
         log.info("작품 등록 처리: {}", request.getTitle());
 
-        Long contentId = generateContentId();
-        log.info("작품 고유 번호 생성: {}", contentId);
+        Long novelId = generateNovelId();
+        log.info("작품 고유 번호 생성: {}", novelId);
 
         Novel novel = novelRepository.save(
                 Novel.builder()
-                        .contentId(contentId)
+                        .novelId(novelId)
                         .title(request.getTitle())
                         .thumbnail(request.getThumbnail())
                         .description(request.getDescription())
@@ -90,12 +90,12 @@ public class NovelService {
         return NovelDto.NovelInfoResponse.from(novel);
     }
 
-    public NovelDto.NovelInfoResponse getNovel(Long contentId) {
-        log.info("작품 조회 처리: {}", contentId);
+    public NovelDto.NovelInfoResponse getNovel(Long novelId) {
+        log.info("작품 조회 처리: {}", novelId);
 
-        Novel novel = novelRepository.findByContentId(contentId)
+        Novel novel = novelRepository.findByNovelId(novelId)
                 .orElseThrow(() -> {
-                    log.error("작품을 찾을 수 없습니다. {}", contentId);
+                    log.error("작품을 찾을 수 없습니다. {}", novelId);
                     return new CustomException(NOVEL_NOT_FOUND);
                 });
 
@@ -103,7 +103,7 @@ public class NovelService {
         return NovelDto.NovelInfoResponse.from(novel);
     }
 
-    private Long generateContentId() {
+    private Long generateNovelId() {
         UUID uuid = UUID.randomUUID();
 
         return Math.abs(uuid.getMostSignificantBits());
@@ -111,10 +111,10 @@ public class NovelService {
 
     @Transactional
     public NovelDto.NovelInfoResponse updateThumbnail(
-            Long contentId, MultipartFile file, CustomUserDetails user
+            Long novelId, MultipartFile file, CustomUserDetails user
     ) throws IOException {
-        log.info("섬네일 수정 처리: {}", contentId);
-        Novel novel = findNovelOrThrow(contentId);
+        log.info("섬네일 수정 처리: {}", novelId);
+        Novel novel = findNovelOrThrow(novelId);
 
         checkPermissionOrThrow(novel, user);
 
@@ -129,10 +129,10 @@ public class NovelService {
 
     @Transactional
     public NovelDto.NovelInfoResponse updateNovel(
-            Long contentId, NovelDto.UpdateNovelRequest request, CustomUserDetails user
+            Long novelId, NovelDto.UpdateNovelRequest request, CustomUserDetails user
     ) {
         log.info("작품 수정 처리: {}", request.getTitle());
-        Novel novel = findNovelOrThrow(contentId);
+        Novel novel = findNovelOrThrow(novelId);
 
         checkPermissionOrThrow(novel, user);
 
@@ -156,9 +156,9 @@ public class NovelService {
     }
 
     @Transactional
-    public void deleteNovel(Long contentId, CustomUserDetails user) throws IOException {
-        log.info("작품 삭제 처리: {}", contentId);
-        Novel novel = findNovelOrThrow(contentId);
+    public void deleteNovel(Long novelId, CustomUserDetails user) throws IOException {
+        log.info("작품 삭제 처리: {}", novelId);
+        Novel novel = findNovelOrThrow(novelId);
 
         checkPermissionOrThrow(novel, user);
 
@@ -168,10 +168,10 @@ public class NovelService {
         log.info("작품 삭제 성공");
     }
 
-    private Novel findNovelOrThrow(Long contentId) {
-        return novelRepository.findByContentId(contentId)
+    private Novel findNovelOrThrow(Long novelId) {
+        return novelRepository.findByNovelId(novelId)
                 .orElseThrow(() -> {
-                    log.error("존재하지 않는 작품: {}", contentId);
+                    log.error("존재하지 않는 작품: {}", novelId);
                     return new CustomException(NOVEL_NOT_FOUND);
                 });
     }

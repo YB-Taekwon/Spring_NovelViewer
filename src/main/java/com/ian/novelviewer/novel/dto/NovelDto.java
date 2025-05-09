@@ -81,7 +81,7 @@ public class NovelDto {
     @Builder
     public static class NovelInfoResponse {
 
-        private Long contentId;
+        private Long novelId;
         private String thumbnail;
         private String title;
         private String description;
@@ -90,7 +90,7 @@ public class NovelDto {
 
         public static NovelInfoResponse from(Novel novel) {
             return NovelInfoResponse.builder()
-                    .contentId(novel.getContentId())
+                    .novelId(novel.getNovelId())
                     .thumbnail(novel.getThumbnail())
                     .title(novel.getTitle())
                     .description(novel.getDescription())

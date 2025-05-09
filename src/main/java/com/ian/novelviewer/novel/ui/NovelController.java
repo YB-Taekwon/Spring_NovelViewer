@@ -84,55 +84,55 @@ public class NovelController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{contentId}")
-    public ResponseEntity<?> getNovel(@PathVariable Long contentId) {
-        log.info("작품 조회 요청: {}", contentId);
-        NovelDto.NovelInfoResponse novel = novelService.getNovel(contentId);
+    @GetMapping("/{novelId}")
+    public ResponseEntity<?> getNovel(@PathVariable Long novelId) {
+        log.info("작품 조회 요청: {}", novelId);
+        NovelDto.NovelInfoResponse novel = novelService.getNovel(novelId);
 
         log.info("작품 조회 완료: {}", novel.getTitle());
         return ResponseEntity.ok(novel);
     }
 
     @PutMapping(
-            value = "/{contentId}/thumbnails",
+            value = "/{novelId}/thumbnails",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasRole('AUTHOR')")
     public ResponseEntity<?> updateThumbnail(
-            @PathVariable Long contentId,
+            @PathVariable Long novelId,
             @RequestParam("thumbnail") MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails user
     ) throws IOException {
         log.info("섬네일 수정 요청: {}", file.getOriginalFilename());
-        NovelDto.NovelInfoResponse response = novelService.updateThumbnail(contentId, file, user);
+        NovelDto.NovelInfoResponse response = novelService.updateThumbnail(novelId, file, user);
 
         log.info("섬네일 수정 완료: {}", response.getThumbnail());
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{contentId}")
+    @PatchMapping("/{novelId}")
     @PreAuthorize("hasRole('AUTHOR')")
     public ResponseEntity<?> updateNovel(
-            @PathVariable Long contentId,
+            @PathVariable Long novelId,
             @RequestBody NovelDto.UpdateNovelRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        log.info("작품 수정 요청: {}", contentId);
-        NovelDto.NovelInfoResponse response = novelService.updateNovel(contentId, request, user);
+        log.info("작품 수정 요청: {}", novelId);
+        NovelDto.NovelInfoResponse response = novelService.updateNovel(novelId, request, user);
 
         log.info("작품 수정 완료: {}", response.getTitle());
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{contentId}")
+    @DeleteMapping("/{novelId}")
     @PreAuthorize("hasRole('AUTHOR')")
     public ResponseEntity<?> deleteNovel(
-            @PathVariable Long contentId,
+            @PathVariable Long novelId,
             @AuthenticationPrincipal CustomUserDetails user
     ) throws IOException {
-        log.info("작품 삭제 요청: {}", contentId);
-        novelService.deleteNovel(contentId, user);
+        log.info("작품 삭제 요청: {}", novelId);
+        novelService.deleteNovel(novelId, user);
 
         log.info("작품 삭제 성공");
         return ResponseEntity.ok("작품 삭제에 성공했습니다.");

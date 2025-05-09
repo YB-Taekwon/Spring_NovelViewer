@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface NovelRepository extends JpaRepository<Novel, Long> {
-    Optional<Novel> findByContentId(Long contentId);
+    Optional<Novel> findByNovelId(Long contentId);
 
     Page<Novel> findAllByCategory(Category category, Pageable pageable);
 
