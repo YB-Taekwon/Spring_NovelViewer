@@ -3,6 +3,7 @@ package com.ian.novelviewer.common.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,6 +28,8 @@ public class GlobalExceptionHandler {
                 .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
+        log.error("커스텀 에러 발생: {}", errorMessage);
+
         ErrorResponse response = ErrorResponse.builder()
                 .errorCode("VALIDATION_ERROR")
                 .message(errorMessage)
@@ -36,9 +39,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+        log.error("접근 거부 예외 발생: {}", e.getMessage(), e);
+
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode("ACCESS_DENIED")
+                .message("접근이 거부되었습니다.")
+                .status(HttpStatus.FORBIDDEN.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
-        log.error("처리되지 않은 예외 발생", e);
+        log.error("서버 내부 오류 발생: {}", e.getMessage(), e);
 
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 
