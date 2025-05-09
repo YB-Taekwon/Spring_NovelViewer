@@ -1,9 +1,13 @@
 package com.ian.novelviewer.novel.domain;
 
 import com.ian.novelviewer.common.base.BaseEntity;
+import com.ian.novelviewer.episode.domain.Episode;
 import com.ian.novelviewer.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -32,6 +36,9 @@ public class Novel extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
+
+    @OneToMany(mappedBy = "novel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Episode> episodes = new ArrayList<>();
 
     public void changeThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
