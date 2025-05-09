@@ -43,6 +43,8 @@ public class NovelController {
             log.info("섬네일 업로드 요청: {}", file.getOriginalFilename());
             NovelDto.ThumbnailResponse response = s3Service.upload(file, S3_FOLDER_NAME);
 
+            log.info("섬네일 업로드 성공: {}", response.getThumbnailKey());
+
             return ResponseEntity.ok(response);
 
         } catch (IOException e) {
@@ -60,6 +62,7 @@ public class NovelController {
         log.info("작품 등록 요청: {}", request.getTitle());
         NovelDto.NovelInfoResponse response = novelService.createNovel(request, user);
 
+        log.info("작품 등록 완료: {}", response.getTitle());
         return ResponseEntity.ok(response);
     }
 
