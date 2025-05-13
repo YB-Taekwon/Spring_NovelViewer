@@ -16,7 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import static com.ian.novelviewer.common.enums.Role.ROLE_ADMIN;
 import static com.ian.novelviewer.common.exception.ErrorCode.*;
 
 @Slf4j
@@ -78,11 +80,65 @@ public class EpisodeService {
         log.debug("회차 단건 조회 요청 - novelId={}, episodeId={}", novelId, episodeId);
 
         Novel novel = findNovelOrThrow(novelId);
-        Episode episode = findEpisodeOrThrow(episodeId);
+        Episode episode = findEpisodeOrThrow(novelId, episodeId);
 
-        checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, episode, novel);
+        checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, novel, episode);
 
         return EpisodeDto.EpisodeContentResponse.from(episode);
+    }
+
+
+    @Transactional
+    public EpisodeDto.EpisodeInfoResponse updateEpisode(
+            Long novelId,
+            Long episodeId,
+            EpisodeDto.UpdateEpisodeRequest request,
+            CustomUserDetails user
+    ) {
+        log.debug("회차 수정 요청 - novelId={}, episodeId={}, 요청자={}", novelId, episodeId, user.getUsername());
+
+        Novel novel = findNovelOrThrow(novelId);
+        checkPermissionOrThrow(user, novel);
+
+        Episode episode = findEpisodeOrThrow(novelId, episodeId);
+        checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, novel, episode);
+
+        if (StringUtils.hasText(request.getTitle())) {
+            log.debug("회차 제목 수정 - 기존: {}, 변경: {}", episode.getTitle(), request.getTitle());
+            episode.changeTitle(request.getTitle());
+        }
+
+        if (StringUtils.hasText(request.getContent())) {
+            log.debug("회차 내용 수정 - 변경된 내용 길이: {}자", request.getContent().length());
+            episode.changeContent(request.getContent());
+        }
+
+        log.debug("회차 수정 완료 - episodeId={}", episode.getEpisodeId());
+        return EpisodeDto.EpisodeInfoResponse.from(episode);
+    }
+
+
+    @Transactional
+    public void deleteEpisode(Long novelId, Long episodeId, CustomUserDetails user) {
+        log.debug("회차 삭제 요청 - novelId={}, episodeId={}, 요청자={}", novelId, episodeId, user.getUsername());
+
+        Novel novel = findNovelOrThrow(novelId);
+
+        boolean isAdmin = user.getUser().getRoles().contains(ROLE_ADMIN);
+        boolean isAuthor = novel.getAuthor().getLoginId().equals(user.getUsername());
+
+        log.debug("권한 확인 - isAdmin={}, isAuthor={}", isAdmin, isAuthor);
+
+        if (!isAdmin && !isAuthor) {
+            log.error("회차 삭제 권한 없음 - 작가: {}, 요청자: {}", novel.getAuthor().getLoginId(), user.getUsername());
+            throw new CustomException(NO_PERMISSION);
+        }
+
+        Episode episode = findEpisodeOrThrow(novelId, episodeId);
+        checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, novel, episode);
+
+        episodeRepository.delete(episode);
+        log.debug("회차 삭제 완료 - episodeId={}", episodeId);
     }
 
 
@@ -94,8 +150,8 @@ public class EpisodeService {
                 });
     }
 
-    private Episode findEpisodeOrThrow(Long episodeId) {
-        return episodeRepository.findById(episodeId)
+    private Episode findEpisodeOrThrow(Long novelId, Long episodeId) {
+        return episodeRepository.findByNovel_NovelIdAndEpisodeId(novelId, episodeId)
                 .orElseThrow(() -> {
                     log.error("존재하지 않는 회차: {}", episodeId);
                     return new CustomException(EPISODE_NOT_FOUND);
@@ -110,7 +166,7 @@ public class EpisodeService {
     }
 
     private static void checkEpisodeBelongsToNovelOrThrow(
-            Long novelId, Long episodeId, Episode episode, Novel novel
+            Long novelId, Long episodeId, Novel novel, Episode episode
     ) {
         if (!episode.getNovel().getNovelId().equals(novel.getNovelId())) {
             log.error("회차가 해당 작품에 속하지 않음: episodeId={}, novelId={}", episodeId, novelId);
