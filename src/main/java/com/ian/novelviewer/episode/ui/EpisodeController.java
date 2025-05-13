@@ -29,11 +29,13 @@ public class EpisodeController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        log.info("모든 회차 조회 요청: {}", novelId);
+        log.info("GET /novels/{}/episodes - 회차 목록 요청 (page={}, size={})", novelId, page, size);
+
         Page<EpisodeDto.EpisodeTitleResponse> responses =
                 episodeService.getAllEpisodes(novelId, page, size);
 
-        log.info("모든 회차 조회 완료");
+        log.info("GET /novels/{}/episodes - 회차 목록 응답 완료 (총 {}건)",
+                novelId, responses.getTotalElements());
         return ResponseEntity.ok(responses);
     }
 
@@ -44,10 +46,12 @@ public class EpisodeController {
             @RequestBody @Valid EpisodeDto.CreateEpisodeRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        log.info("회차 등록 요청: {}", request.getTitle());
+        log.info("POST /novels/{}/episodes - 회차 등록 요청 by {} - 제목: {}",
+                novelId, user.getUsername(), request.getTitle());
         EpisodeDto.EpisodeInfoResponse response = episodeService.createEpisode(novelId, request, user);
 
-        log.info("회차 등록 완료: {}", response.getTitle());
+        log.info("POST /novels/{}/episodes - 회차 등록 완료 - episodeId: {}, 제목: {}",
+                novelId, response.getEpisodeId(), response.getTitle());
         return ResponseEntity.ok(response);
     }
 
@@ -55,10 +59,11 @@ public class EpisodeController {
     public ResponseEntity<?> getEpisode(
             @PathVariable Long novelId, @PathVariable Long episodeId
     ) {
-        log.info("회차 조회 요청: {}", novelId);
+        log.info("GET /novels/{}/episodes/{} - 회차 조회 요청", novelId, episodeId);
+
         EpisodeDto.EpisodeContentResponse response = episodeService.getEpisode(novelId, episodeId);
 
-        log.info("회차 조회 완료");
+        log.info("GET /novels/{}/episodes/{} - 회차 조회 완료", novelId, episodeId);
         return ResponseEntity.ok(response);
     }
 }

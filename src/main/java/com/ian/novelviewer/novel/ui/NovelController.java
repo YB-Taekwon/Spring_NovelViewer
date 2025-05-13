@@ -27,20 +27,23 @@ public class NovelController {
 
     private final NovelService novelService;
 
+
     @GetMapping
     public ResponseEntity<?> getAllNovels(
             @RequestParam(name = "category", required = false) Category category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        log.info("전체 작품 목록 조회 요청");
+        log.info("GET /novels - 작품 목록 조회 요청 (category={}, page={}, size={})", category, page, size);
 
         Pageable pageable = getPageable(page, size);
         Page<NovelDto.NovelResponse> responses = novelService.getAllNovels(category, pageable);
 
-        log.info("전체 작품 목록 조회 완료");
+        log.info("GET /novels - 조회 완료 (총 {}건)", responses.getTotalElements());
+
         return ResponseEntity.ok(responses);
     }
+
 
     @GetMapping("/search")
     public ResponseEntity<?> searchNovel(
@@ -48,14 +51,16 @@ public class NovelController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        log.info("검색 요청 - 키워드: {}", keyword);
+        log.info("GET /novels/search - 검색 요청 (keyword='{}', page={}, size={})", keyword, page, size);
 
         Pageable pageable = getPageable(page, size);
         Page<NovelDto.NovelResponse> responses = novelService.searchNovel(keyword, pageable);
 
-        log.info("검색 완료");
+        log.info("GET /novels/search - 검색 완료 (총 {}건)", responses.getTotalElements());
+
         return ResponseEntity.ok(responses);
     }
+
 
     @PostMapping(
             value = "/thumbnails",
@@ -64,12 +69,15 @@ public class NovelController {
     )
     @PreAuthorize("hasRole('AUTHOR')")
     public ResponseEntity<?> uploadThumbnail(@RequestParam("thumbnail") MultipartFile file) throws IOException {
-        log.info("섬네일 업로드 요청: {}", file.getOriginalFilename());
+        log.info("POST /novels/thumbnails - 섬네일 업로드 요청 (파일명={})", file.getOriginalFilename());
+
         NovelDto.ThumbnailResponse response = novelService.uploadThumbnail(file);
 
-        log.info("섬네일 업로드 완료: {}", response.getThumbnailKey());
+        log.info("POST /novels/thumbnails - 업로드 완료 (thumbnailKey={})", response.getThumbnailKey());
+
         return ResponseEntity.ok(response);
     }
+
 
     @PostMapping
     @PreAuthorize("hasRole('AUTHOR')")
@@ -77,21 +85,27 @@ public class NovelController {
             @RequestBody @Valid NovelDto.CreateNovelRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        log.info("작품 등록 요청: {}", request.getTitle());
+        log.info("POST /novels - 작품 등록 요청 by {} (제목='{}')", user.getUsername(), request.getTitle());
+
         NovelDto.NovelInfoResponse response = novelService.createNovel(request, user);
 
-        log.info("작품 등록 완료: {}", response.getTitle());
+        log.info("POST /novels - 등록 완료 (novelId={}, 제목='{}')", response.getNovelId(), response.getTitle());
+
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/{novelId}")
     public ResponseEntity<?> getNovel(@PathVariable Long novelId) {
-        log.info("작품 조회 요청: {}", novelId);
+        log.info("GET /novels/{} - 작품 조회 요청", novelId);
+
         NovelDto.NovelInfoResponse novel = novelService.getNovel(novelId);
 
-        log.info("작품 조회 완료: {}", novel.getTitle());
+        log.info("GET /novels/{} - 조회 완료 (제목='{}')", novelId, novel.getTitle());
+
         return ResponseEntity.ok(novel);
     }
+
 
     @PutMapping(
             value = "/{novelId}/thumbnails",
@@ -104,12 +118,16 @@ public class NovelController {
             @RequestParam("thumbnail") MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails user
     ) throws IOException {
-        log.info("섬네일 수정 요청: {}", file.getOriginalFilename());
+        log.info("PUT /novels/{}/thumbnails - 섬네일 수정 요청 by {} (파일명={})",
+                novelId, user.getUsername(), file.getOriginalFilename());
+
         NovelDto.NovelInfoResponse response = novelService.updateThumbnail(novelId, file, user);
 
-        log.info("섬네일 수정 완료: {}", response.getThumbnail());
+        log.info("PUT /novels/{}/thumbnails - 수정 완료 (thumbnailKey={})", novelId, response.getThumbnail());
+
         return ResponseEntity.ok(response);
     }
+
 
     @PatchMapping("/{novelId}")
     @PreAuthorize("hasRole('AUTHOR')")
@@ -118,12 +136,15 @@ public class NovelController {
             @RequestBody NovelDto.UpdateNovelRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        log.info("작품 수정 요청: {}", novelId);
+        log.info("PATCH /novels/{} - 작품 수정 요청 by {}", novelId, user.getUsername());
+
         NovelDto.NovelInfoResponse response = novelService.updateNovel(novelId, request, user);
 
-        log.info("작품 수정 완료: {}", response.getTitle());
+        log.info("PATCH /novels/{} - 수정 완료 (제목='{}')", novelId, response.getTitle());
+
         return ResponseEntity.ok(response);
     }
+
 
     @DeleteMapping("/{novelId}")
     @PreAuthorize("hasAnyRole('AUTHOR', 'ADMIN')")
@@ -131,12 +152,15 @@ public class NovelController {
             @PathVariable Long novelId,
             @AuthenticationPrincipal CustomUserDetails user
     ) throws IOException {
-        log.info("작품 삭제 요청: {}", novelId);
+        log.info("DELETE /novels/{} - 삭제 요청 by {}", novelId, user.getUsername());
+
         novelService.deleteNovel(novelId, user);
 
-        log.info("작품 삭제 성공");
+        log.info("DELETE /novels/{} - 삭제 완료", novelId);
+
         return ResponseEntity.ok("작품 삭제에 성공했습니다.");
     }
+
 
     private static Pageable getPageable(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

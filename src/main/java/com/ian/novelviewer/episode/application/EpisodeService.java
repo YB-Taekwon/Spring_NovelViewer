@@ -29,14 +29,15 @@ public class EpisodeService {
     private final EpisodeIdService episodeIdService;
 
     public Page<EpisodeDto.EpisodeTitleResponse> getAllEpisodes(Long novelId, int page, int size) {
-        log.info("모든 회차 조회 처리: {}", novelId);
+        log.debug("회차 목록 요청 - novelId={}, page={}, size={}", novelId, page, size);
+
         Pageable pageable = getPageable(page, size);
 
         Novel novel = findNovelOrThrow(novelId);
 
         Page<Episode> episodes = episodeRepository.findByNovel(novel, pageable);
 
-        log.info("모든 회차 조회 성공");
+        log.debug("조회된 회차 수: {}", episodes.getTotalElements());
         return episodes.map(EpisodeDto.EpisodeTitleResponse::from);
     }
 
@@ -49,12 +50,15 @@ public class EpisodeService {
     public EpisodeDto.EpisodeInfoResponse createEpisode(
             Long novelId, EpisodeDto.CreateEpisodeRequest request, CustomUserDetails user
     ) {
-        log.info("회차 등록 처리: {}", request.getTitle());
-        Novel novel = findNovelOrThrow(novelId);
+        log.debug("회차 등록 요청 - novelId={}, 요청자={}", novelId, user.getUsername());
+        log.debug("회차 제목={}, 내용(앞 30자)={}", request.getTitle(),
+                request.getContent().substring(0, Math.min(30, request.getContent().length())));
 
+        Novel novel = findNovelOrThrow(novelId);
         checkPermissionOrThrow(user, novel);
 
         Long episodeId = episodeIdService.getNextEpisodeId(novel.getId());
+        log.debug("생성된 회차 ID: {}", episodeId);
 
         Episode episode = episodeRepository.save(
                 Episode.builder()
@@ -65,20 +69,19 @@ public class EpisodeService {
                         .build()
         );
 
-        log.info("회차 등록 성공: {}", episode.getTitle());
+        log.debug("회차 등록 완료 - episodeId={}", episode.getEpisodeId());
         return EpisodeDto.EpisodeInfoResponse.from(episode);
     }
 
 
     public EpisodeDto.EpisodeContentResponse getEpisode(Long novelId, Long episodeId) {
-        log.info("회차 조회 처리: {}", novelId);
-        Novel novel = findNovelOrThrow(novelId);
+        log.debug("회차 단건 조회 요청 - novelId={}, episodeId={}", novelId, episodeId);
 
+        Novel novel = findNovelOrThrow(novelId);
         Episode episode = findEpisodeOrThrow(episodeId);
 
         checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, episode, novel);
 
-        log.info("회차 조회 성공: {}", episode.getTitle());
         return EpisodeDto.EpisodeContentResponse.from(episode);
     }
 
