@@ -1,7 +1,6 @@
 package com.ian.novelviewer.episode.application;
 
 import com.ian.novelviewer.common.exception.CustomException;
-import com.ian.novelviewer.common.redis.EpisodeIdService;
 import com.ian.novelviewer.common.security.CustomUserDetails;
 import com.ian.novelviewer.episode.domain.Episode;
 import com.ian.novelviewer.episode.domain.EpisodeRepository;
@@ -79,10 +78,7 @@ public class EpisodeService {
     public EpisodeDto.EpisodeContentResponse getEpisode(Long novelId, Long episodeId) {
         log.debug("회차 단건 조회 요청 - novelId={}, episodeId={}", novelId, episodeId);
 
-        Novel novel = findNovelOrThrow(novelId);
         Episode episode = findEpisodeOrThrow(novelId, episodeId);
-
-        checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, novel, episode);
 
         return EpisodeDto.EpisodeContentResponse.from(episode);
     }
@@ -98,10 +94,9 @@ public class EpisodeService {
         log.debug("회차 수정 요청 - novelId={}, episodeId={}, 요청자={}", novelId, episodeId, user.getUsername());
 
         Novel novel = findNovelOrThrow(novelId);
-        checkPermissionOrThrow(user, novel);
-
         Episode episode = findEpisodeOrThrow(novelId, episodeId);
-        checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, novel, episode);
+
+        checkPermissionOrThrow(user, novel);
 
         if (StringUtils.hasText(request.getTitle())) {
             log.debug("회차 제목 수정 - 기존: {}, 변경: {}", episode.getTitle(), request.getTitle());
@@ -123,19 +118,16 @@ public class EpisodeService {
         log.debug("회차 삭제 요청 - novelId={}, episodeId={}, 요청자={}", novelId, episodeId, user.getUsername());
 
         Novel novel = findNovelOrThrow(novelId);
+        Episode episode = findEpisodeOrThrow(novelId, episodeId);
 
         boolean isAdmin = user.getUser().getRoles().contains(ROLE_ADMIN);
         boolean isAuthor = novel.getAuthor().getLoginId().equals(user.getUsername());
-
         log.debug("권한 확인 - isAdmin={}, isAuthor={}", isAdmin, isAuthor);
 
         if (!isAdmin && !isAuthor) {
-            log.error("회차 삭제 권한 없음 - 작가: {}, 요청자: {}", novel.getAuthor().getLoginId(), user.getUsername());
+            log.error("회차 삭제 권한 없음 - 소유자={}, 요청자={}", novel.getAuthor().getLoginId(), user.getUsername());
             throw new CustomException(NO_PERMISSION);
         }
-
-        Episode episode = findEpisodeOrThrow(novelId, episodeId);
-        checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, novel, episode);
 
         episodeRepository.delete(episode);
         log.debug("회차 삭제 완료 - episodeId={}", episodeId);
@@ -162,15 +154,6 @@ public class EpisodeService {
         if (!novel.getAuthor().getLoginId().equals(user.getUsername())) {
             log.error("회차 등록 권한 없음 - 작가: {}, 작성자: {}", novel.getAuthor().getLoginId(), user.getUsername());
             throw new CustomException(NO_PERMISSION);
-        }
-    }
-
-    private static void checkEpisodeBelongsToNovelOrThrow(
-            Long novelId, Long episodeId, Novel novel, Episode episode
-    ) {
-        if (!episode.getNovel().getNovelId().equals(novel.getNovelId())) {
-            log.error("회차가 해당 작품에 속하지 않음: episodeId={}, novelId={}", episodeId, novelId);
-            throw new CustomException(EPISODE_NOT_FOUND);
         }
     }
 }
