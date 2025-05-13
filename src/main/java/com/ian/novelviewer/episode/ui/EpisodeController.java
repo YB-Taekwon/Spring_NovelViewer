@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/novels/{contentId}/episodes")
+@RequestMapping("/novels/{novelId}/episodes")
 @RequiredArgsConstructor
 public class EpisodeController {
 
@@ -25,14 +25,13 @@ public class EpisodeController {
 
     @GetMapping
     public ResponseEntity<?> getAllEpisodes(
-            @PathVariable Long contentId,
+            @PathVariable Long novelId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        log.info("모든 회차 조회 요청: {}", contentId);
-        Pageable pageable = getPageable(page, size);
-
-        Page<EpisodeDto.EpisodeTitleResponse> responses = episodeService.getAllEpisodes(contentId, pageable);
+        log.info("모든 회차 조회 요청: {}", novelId);
+        Page<EpisodeDto.EpisodeTitleResponse> responses =
+                episodeService.getAllEpisodes(novelId, page, size);
 
         log.info("모든 회차 조회 완료");
         return ResponseEntity.ok(responses);
@@ -41,12 +40,12 @@ public class EpisodeController {
     @PostMapping
     @PreAuthorize("hasRole('AUTHOR')")
     public ResponseEntity<?> createEpisode(
-            @PathVariable Long contentId,
+            @PathVariable Long novelId,
             @RequestBody @Valid EpisodeDto.CreateEpisodeRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         log.info("회차 등록 요청: {}", request.getTitle());
-        EpisodeDto.EpisodeInfoResponse response = episodeService.createEpisode(contentId, request, user);
+        EpisodeDto.EpisodeInfoResponse response = episodeService.createEpisode(novelId, request, user);
 
         log.info("회차 등록 완료: {}", response.getTitle());
         return ResponseEntity.ok(response);
@@ -54,17 +53,12 @@ public class EpisodeController {
 
     @GetMapping("/{episodeId}")
     public ResponseEntity<?> getEpisode(
-            @PathVariable Long contentId, @PathVariable Long episodeId
+            @PathVariable Long novelId, @PathVariable Long episodeId
     ) {
-        log.info("회차 조회 요청: {}", contentId);
-        EpisodeDto.EpisodeContentResponse response = episodeService.getEpisode(contentId, episodeId);
+        log.info("회차 조회 요청: {}", novelId);
+        EpisodeDto.EpisodeContentResponse response = episodeService.getEpisode(novelId, episodeId);
 
         log.info("회차 조회 완료");
         return ResponseEntity.ok(response);
-    }
-
-    private static Pageable getPageable(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("episodeId").ascending());
-        return pageable;
     }
 }

@@ -12,7 +12,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import static com.ian.novelviewer.common.exception.ErrorCode.*;
@@ -26,9 +28,11 @@ public class EpisodeService {
     private final EpisodeRepository episodeRepository;
     private final EpisodeIdService episodeIdService;
 
-    public Page<EpisodeDto.EpisodeTitleResponse> getAllEpisodes(Long contentId, Pageable pageable) {
-        log.info("모든 회차 조회 처리: {}", contentId);
-        Novel novel = findNovelOrThrow(contentId);
+    public Page<EpisodeDto.EpisodeTitleResponse> getAllEpisodes(Long novelId, int page, int size) {
+        log.info("모든 회차 조회 처리: {}", novelId);
+        Pageable pageable = getPageable(page, size);
+
+        Novel novel = findNovelOrThrow(novelId);
 
         Page<Episode> episodes = episodeRepository.findByNovel(novel, pageable);
 
@@ -36,12 +40,17 @@ public class EpisodeService {
         return episodes.map(EpisodeDto.EpisodeTitleResponse::from);
     }
 
+    private static PageRequest getPageable(int page, int size) {
+        return PageRequest.of(page, size, Sort.by("episodeId").ascending());
+    }
+
+
     @Transactional
     public EpisodeDto.EpisodeInfoResponse createEpisode(
-            Long contentId, EpisodeDto.CreateEpisodeRequest request, CustomUserDetails user
+            Long novelId, EpisodeDto.CreateEpisodeRequest request, CustomUserDetails user
     ) {
         log.info("회차 등록 처리: {}", request.getTitle());
-        Novel novel = findNovelOrThrow(contentId);
+        Novel novel = findNovelOrThrow(novelId);
 
         checkPermissionOrThrow(user, novel);
 
@@ -60,22 +69,24 @@ public class EpisodeService {
         return EpisodeDto.EpisodeInfoResponse.from(episode);
     }
 
-    public EpisodeDto.EpisodeContentResponse getEpisode(Long contentId, Long episodeId) {
-        log.info("회차 조회 처리: {}", contentId);
-        Novel novel = findNovelOrThrow(contentId);
+
+    public EpisodeDto.EpisodeContentResponse getEpisode(Long novelId, Long episodeId) {
+        log.info("회차 조회 처리: {}", novelId);
+        Novel novel = findNovelOrThrow(novelId);
 
         Episode episode = findEpisodeOrThrow(episodeId);
 
-        checkEpisodeBelongsToNovelOrThrow(contentId, episodeId, episode, novel);
+        checkEpisodeBelongsToNovelOrThrow(novelId, episodeId, episode, novel);
 
         log.info("회차 조회 성공: {}", episode.getTitle());
         return EpisodeDto.EpisodeContentResponse.from(episode);
     }
 
-    private Novel findNovelOrThrow(Long contentId) {
-        return novelRepository.findByNovelId(contentId)
+
+    private Novel findNovelOrThrow(Long novelId) {
+        return novelRepository.findByNovelId(novelId)
                 .orElseThrow(() -> {
-                    log.error("존재하지 않는 작품: {}", contentId);
+                    log.error("존재하지 않는 작품: {}", novelId);
                     return new CustomException(NOVEL_NOT_FOUND);
                 });
     }
@@ -95,9 +106,11 @@ public class EpisodeService {
         }
     }
 
-    private static void checkEpisodeBelongsToNovelOrThrow(Long contentId, Long episodeId, Episode episode, Novel novel) {
+    private static void checkEpisodeBelongsToNovelOrThrow(
+            Long novelId, Long episodeId, Episode episode, Novel novel
+    ) {
         if (!episode.getNovel().getNovelId().equals(novel.getNovelId())) {
-            log.error("회차가 해당 작품에 속하지 않음: episodeId={}, contentId={}", episodeId, contentId);
+            log.error("회차가 해당 작품에 속하지 않음: episodeId={}, novelId={}", episodeId, novelId);
             throw new CustomException(EPISODE_NOT_FOUND);
         }
     }
