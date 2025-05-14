@@ -58,7 +58,7 @@ public class EpisodeService {
         Novel novel = findNovelOrThrow(novelId);
         checkPermissionOrThrow(user, novel);
 
-        Long episodeId = episodeIdService.getNextEpisodeId(novel.getId());
+        Long episodeId = episodeIdService.getNextEpisodeId(novel.getNovelId());
         log.debug("생성된 회차 ID: {}", episodeId);
 
         Episode episode = episodeRepository.save(
@@ -143,7 +143,7 @@ public class EpisodeService {
     }
 
     private Episode findEpisodeOrThrow(Long novelId, Long episodeId) {
-        return episodeRepository.findByNovel_NovelIdAndEpisodeId(novelId, episodeId)
+        return episodeRepository.findByEpisodeIdAndNovel_NovelId(episodeId, novelId)
                 .orElseThrow(() -> {
                     log.error("존재하지 않는 회차: {}", episodeId);
                     return new CustomException(EPISODE_NOT_FOUND);

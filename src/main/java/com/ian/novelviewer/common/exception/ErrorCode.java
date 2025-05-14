@@ -23,6 +23,7 @@ public enum ErrorCode {
     INVALID_KEYWORD("검색어가 입력되지 않았습니다.", HttpStatus.BAD_REQUEST),
     NO_PERMISSION("해당 작업을 수행할 권한이 없습니다.", HttpStatus.FORBIDDEN),
     EPISODE_NOT_FOUND("해당 회차를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    COMMENT_NOT_FOUND("해당 댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ;
 
     private final String message;
