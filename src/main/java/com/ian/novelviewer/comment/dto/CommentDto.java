@@ -46,12 +46,34 @@ public class CommentDto {
         private String content;
         private Long likes;
         private String writer;
+        private LocalDateTime createdAt;
+
+        public static CommentResponse from(Comment comment, Long likes) {
+            return CommentResponse.builder()
+                    .id(comment.getId())
+                    .content(comment.getContent())
+                    .likes(likes != null ? likes : 0L)
+                    .writer(comment.getUser().getLoginId())
+                    .createdAt(comment.getCreatedAt())
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CommentInfoResponse {
+        private Long id;
+        private String content;
+        private Long likes;
+        private String writer;
         private Long parentId;
         private LocalDateTime createdAt;
         private List<CommentResponse> children;
 
-        public static CommentResponse from(Comment comment, Long likes) {
-            return CommentResponse.builder()
+        public static CommentInfoResponse from(Comment comment, Long likes) {
+            return CommentInfoResponse.builder()
                     .id(comment.getId())
                     .content(comment.getContent())
                     .likes(likes != null ? likes : 0L)
