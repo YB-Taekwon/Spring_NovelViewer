@@ -1,24 +1,32 @@
 package com.ian.novelviewer.common.security;
 
 import com.ian.novelviewer.common.enums.Role;
+import com.ian.novelviewer.common.exception.CustomException;
+import com.ian.novelviewer.common.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
 
+    public static final String TOKEN_HEADER = AUTHORIZATION;
+    public static final String TOKEN_PREFIX = "Bearer ";
     private static final String KEY_ROLE = "roles";
 
     @Value("${spring.jwt.token-validity-in-ms}")
@@ -29,10 +37,12 @@ public class JwtProvider {
 
     private SecretKey secretKey;
 
+
     @PostConstruct
     public void init() {
         this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKeyStr));
     }
+
 
     public String generateToken(String loginId, List<Role> roles) {
         Date now = new Date();
@@ -51,9 +61,11 @@ public class JwtProvider {
                 .compact();
     }
 
+
     public String getLoginId(String token) {
         return parseClaims(token).getSubject();
     }
+
 
     public boolean validateToken(String token) {
         try {
@@ -73,11 +85,28 @@ public class JwtProvider {
         return false;
     }
 
+
     private Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+
+    public String resolveToken(HttpServletRequest request) {
+        String header = request.getHeader(TOKEN_HEADER);
+
+        if (!ObjectUtils.isEmpty(header) && header.startsWith(TOKEN_PREFIX))
+            return header.substring(TOKEN_PREFIX.length());
+
+        throw new CustomException(ErrorCode.INVALID_TOKEN);
+    }
+
+
+    public long getExpiration(String token) {
+        Date expiration = parseClaims(token).getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
     }
 }
