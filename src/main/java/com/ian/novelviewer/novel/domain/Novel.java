@@ -34,7 +34,7 @@ public class Novel extends BaseEntity {
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     @OneToMany(mappedBy = "novel", cascade = CascadeType.ALL, orphanRemoval = true)

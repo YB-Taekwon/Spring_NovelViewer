@@ -27,14 +27,14 @@ public class AuthDto {
         private String email;
 
         @NotBlank(message = "이름을 입력해주세요.")
-        private String realname;
+        private String userName;
 
         public static User from(SignUpRequest request) {
             return User.builder()
                     .loginId(request.loginId)
                     .password(request.password)
                     .email(request.email)
-                    .realname(request.realname)
+                    .userName(request.userName)
                     .roles(List.of(Role.ROLE_USER))
                     .build();
         }
@@ -60,14 +60,14 @@ public class AuthDto {
     public static class SignUpResponse {
         private String loginId;
         private String email;
-        private String realname;
+        private String userName;
         private List<Role> roles;
 
         public static AuthDto.SignUpResponse from(User user) {
             return SignUpResponse.builder()
                     .loginId(user.getLoginId())
                     .email(user.getEmail())
-                    .realname(user.getRealname())
+                    .userName(user.getUserName())
                     .roles(user.getRoles())
                     .build();
         }
@@ -80,7 +80,7 @@ public class AuthDto {
     public static class SignInResponse {
         private String loginId;
         private String email;
-        private String realname;
+        private String userName;
         private List<Role> roles;
         private String token;
 
@@ -88,7 +88,7 @@ public class AuthDto {
             return SignInResponse.builder()
                     .loginId(user.getLoginId())
                     .email(user.getEmail())
-                    .realname(user.getRealname())
+                    .userName(user.getUserName())
                     .roles(user.getRoles())
                     .token(token)
                     .build();

@@ -14,10 +14,20 @@ public class EpisodeDto {
     @AllArgsConstructor
     @Builder
     public static class CreateEpisodeRequest {
+
         @NotBlank
         private String title;
 
         @NotBlank
+        private String content;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class UpdateEpisodeRequest {
+        private String title;
         private String content;
     }
 
