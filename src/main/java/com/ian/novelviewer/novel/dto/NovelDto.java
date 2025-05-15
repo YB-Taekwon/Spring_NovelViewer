@@ -70,7 +70,7 @@ public class NovelDto {
             return NovelResponse.builder()
                     .thumbnail(novel.getThumbnail())
                     .title(novel.getTitle())
-                    .author(novel.getAuthor().getNickname())
+                    .author(novel.getAuthor().getAuthorName())
                     .build();
         }
     }
@@ -95,7 +95,7 @@ public class NovelDto {
                     .title(novel.getTitle())
                     .description(novel.getDescription())
                     .category(novel.getCategory())
-                    .author(novel.getAuthor().getNickname())
+                    .author(novel.getAuthor().getAuthorName())
                     .build();
         }
     }
