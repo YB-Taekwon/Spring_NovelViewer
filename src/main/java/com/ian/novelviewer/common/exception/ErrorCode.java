@@ -19,6 +19,7 @@ public enum ErrorCode {
     ALREADY_HAS_ROLE("이미 해당 권한을 보유하고 있습니다.", HttpStatus.BAD_REQUEST),
     INVALID_KEYWORD("검색어가 입력되지 않았습니다.", HttpStatus.BAD_REQUEST),
     INVALID_COMMENT("대댓글은 한 단계까지만 작성할 수 있습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN("유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST),
 
     // 401 UNAUTHORIZED
     INVALID_CREDENTIALS("아이디 또는 비밀번호가 잘못되었습니다.", HttpStatus.UNAUTHORIZED),
