@@ -101,7 +101,7 @@ public class JwtProvider {
         if (!ObjectUtils.isEmpty(header) && header.startsWith(TOKEN_PREFIX))
             return header.substring(TOKEN_PREFIX.length());
 
-        throw new CustomException(ErrorCode.INVALID_TOKEN);
+        return null;
     }
 
 

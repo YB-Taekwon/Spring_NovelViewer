@@ -39,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(token) && jwtProvider.validateToken(token)) {
             String isSignout = redisTemplate.opsForValue().get(token);
+
             if (ObjectUtils.isEmpty(isSignout)) {
                 Authentication authentication = getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 import static com.ian.novelviewer.common.exception.ErrorCode.INVALID_TOKEN;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -28,6 +30,8 @@ public class AuthController {
     private final AuthService authService;
     private final JwtProvider jwtProvider;
 
+    private static final String KEY_EMAIL = "email";
+    private static final String KEY_CODE = "code";
 
     /**
      * 회원가입 요청을 처리합니다.
@@ -79,5 +83,38 @@ public class AuthController {
 
         log.info("로그아웃 성공 - 토큰 처리 완료");
         return ResponseEntity.ok("정상적으로 로그아웃이 완료되었습니다.");
+    }
+
+
+    /**
+     * 이메일 인증 요청을 처리합니다.
+     * 사용자의 이메일로 인증 코드를 전송합니다.
+     *
+     * @param payload 이메일 정보를 담은 요청 본문
+     * @return 인증 코드 전송 결과 메시지
+     */
+    @PostMapping("/email/verify-request")
+    public ResponseEntity<?> requestVerification(@RequestBody Map<String, String> payload) {
+        String email = payload.get(KEY_EMAIL);
+        log.info("이메일 인증 코드 요청 수신: {}", email);
+
+        authService.sendVerificationCode(email);
+
+        log.info("인증 코드 전송 완료 - 이메일: {}", email);
+        return ResponseEntity.ok("인증 코드가 발송되었습니다.");
+    }
+
+
+    @PostMapping("/email/verify")
+    public ResponseEntity<?> verify(@RequestBody Map<String, String> payload) {
+        String email = payload.get(KEY_EMAIL);
+        String code = payload.get(KEY_CODE);
+
+        log.info("이메일 인증 코드 검증 요청 수신 - 이메일: {}, 입력 코드: {}", email, code);
+
+        authService.verifyCode(email, code);
+
+        log.info("이메일 인증 성공 - 이메일: {}", email);
+        return ResponseEntity.ok("인증이 완료되었습니다.");
     }
 }

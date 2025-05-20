@@ -13,6 +13,8 @@ public enum ErrorCode {
     FILE_EMPTY("파일이 비어 있습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_PROCESSING_ERROR("파일을 처리하는 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_FILE_FORMAT("올바른 이미지 파일 형식이 아닙니다. (jpg, png, jpeg 등)", HttpStatus.INTERNAL_SERVER_ERROR),
+    MAILGUN_SEND_FAILED("Mailgun 메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    MAILGUN_NETWORK_ERROR("Mailgun 네트워크 연결에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // 400 BAD_REQUEST
     VALIDATION_ERROR("필드의 값이 유효한 형식이 아닙니다. 올바른 값을 입력해주세요.", HttpStatus.BAD_REQUEST),
@@ -20,12 +22,14 @@ public enum ErrorCode {
     INVALID_KEYWORD("검색어가 입력되지 않았습니다.", HttpStatus.BAD_REQUEST),
     INVALID_COMMENT("대댓글은 한 단계까지만 작성할 수 있습니다.", HttpStatus.BAD_REQUEST),
     INVALID_TOKEN("유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST),
+    INVALID_VERIFICATION_CODE("인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
 
     // 401 UNAUTHORIZED
     INVALID_CREDENTIALS("아이디 또는 비밀번호가 잘못되었습니다.", HttpStatus.UNAUTHORIZED),
 
     // 403 FORBIDDEN
     NO_PERMISSION("해당 작업을 수행할 권한이 없습니다.", HttpStatus.FORBIDDEN),
+    EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다.", HttpStatus.FORBIDDEN),
 
     // 404 NOT_FOUND
     USER_NOT_FOUND("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
